@@ -1,0 +1,5 @@
+<?php
+
+// getData();
+// getRoute();
+// getMethod();
