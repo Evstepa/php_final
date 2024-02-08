@@ -6,11 +6,10 @@ namespace App\Core;
 
 use PDO;
 use Exception;
-use DesignPatterns\Creational\Singleton\Singleton;
 
-final class Db
+class Db
 {
-    private object $connect;
+    protected PDO $connect;
 
     private static $instance = null;
 
@@ -42,9 +41,10 @@ final class Db
         throw new Exception("Cannot unserialize singleton");
     }
 
-    // public function getConnection()
-    // {
-    // }
+    public function getConnection(): PDO
+    {
+        return $this->connect;
+    }
 
     public function findAll(): array
     {
