@@ -1,5 +1,13 @@
 <?php
 
-// getData();
-// getRoute();
-// getMethod();
+
+namespace App\Core;
+
+
+class Request
+{
+
+    // getData();
+    // getRoute();
+    // getMethod();
+}

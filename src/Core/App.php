@@ -1,3 +1,9 @@
 <?php
 
-// getService();
+namespace App\Core;
+
+class App
+{
+
+    // getService();
+}

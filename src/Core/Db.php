@@ -9,6 +9,8 @@ use Exception;
 
 class Db
 {
+    public string $tableName;
+
     protected PDO $connect;
 
     private static $instance = null;
@@ -58,7 +60,7 @@ class Db
 
     /**
      * @param int $id
-     * @return Uarray|null
+     * @return array|null
      */
     public function find(int $id): ?array
     {
