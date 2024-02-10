@@ -18,4 +18,16 @@ final class UserRepository extends Db
 
         return $state->execute($user);
     }
+
+    public function findAllGeneralData()
+    {
+        $db = self::getInstance();
+        $currentConnect = $db->getConnection();
+
+        $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
+
+        $state = $currentConnect->prepare($sql);
+        $state->execute();
+        return $state->fetchAll();
+    }
 }

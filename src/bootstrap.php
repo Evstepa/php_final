@@ -9,4 +9,4 @@ use App\Core\Router;
 // require_once './Core/Response.php';
 // require_once './Core/Router.php';
 
-Router::start(); // запускаем маршрутизатор
+// Router::route("/path", name="name")(); // запускаем маршрутизатор

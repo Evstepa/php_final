@@ -4,66 +4,63 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use Exception;
+use App\Core\Request;
+use App\Core\Response;
+
 class Router
 {
-    static function start()
+    const ROUTES = [
+        "/user/list" => [
+            'method' => 'GET',
+            'action' => 'UserController::getUsetList',
+        ],
+        "/user/get/{id}" => "",
+        "/user/update" => "",
+        "/user/login" => "",
+        "/user/logout" => "",
+        "/user/reset_password" => "",
+    ];
+
+    private function __construct()
     {
-        // контроллер и действие по умолчанию
-        $controller_name = 'main';
-        $action_name = 'index';
-
-        $Routers = explode('/', $_SERVER['REQUEST_URI']);
-
-        // получаем имя контроллера
-        if (!empty($Routers[1])) {
-            $controller_name = $Routers[1];
-        }
-
-        // получаем имя экшена
-        if (!empty($Routers[2])) {
-            $action_name = $Routers[2];
-        }
-
-        // добавляем префиксы
-        $model_name = 'Model_' . $controller_name;
-        $controller_name = 'Controller_' . $controller_name;
-        $action_name = 'action_' . $action_name;
-
-        // подцепляем файл с классом модели (файла модели может и не быть)
-
-        $model_file = strtolower($model_name) . '.php';
-        $model_path = "application/models/" . $model_file;
-        if (file_exists($model_path)) {
-            include "application/models/" . $model_file;
-        }
-
-        // подцепляем файл с классом контроллера
-        $controller_file = strtolower($controller_name) . '.php';
-        $controller_path = "application/controllers/" . $controller_file;
-        if (file_exists($controller_path)) {
-            include "application/controllers/" . $controller_file;
-        } else {
-            /*
-			правильно было бы кинуть здесь исключение,
-			но для упрощения сразу сделаем редирект на страницу 404
-			*/
-            Router::ErrorPage404();
-        }
-
-        // создаем контроллер
-        $controller = new $controller_name;
-        $action = $action_name;
-
-        if (method_exists($controller, $action)) {
-            // вызываем действие контроллера
-            $controller->$action();
-        } else {
-            // здесь также разумнее было бы кинуть исключение
-            Router::ErrorPage404();
-        }
+    }
+    private function __clone()
+    {
     }
 
-    function ErrorPage404()
+    public function processRequest(Request $request): Response
+    {
+        return new Response();
+    }
+
+    public static function execute(string $url, string $method)
+    {
+        $parseUrl = parse_url($url);
+        var_dump($parseUrl);
+
+        $callback = null;
+
+        if (array_key_exists($parseUrl['path'], self::ROUTES)) {
+            $callback = self::ROUTES[$parseUrl['path']];
+        }
+        var_dump($callback);
+        // if ($callback['method'] != $method) {
+        //     Router::ErrorPage404();
+        //     return;
+        // }
+
+        $params = [];
+        if (array_key_exists('query', $parseUrl)) {
+            $params = explode('=', $parseUrl['query']);
+        }
+
+        var_dump($params);
+
+        // return call_user_func_array($callback['action'], array_values($params));
+    }
+
+    public static function ErrorPage404()
     {
         $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
         header('HTTP/1.1 404 Not Found');
@@ -71,5 +68,3 @@ class Router
         header('Location:' . $host . '404');
     }
 }
-
-// processRequest();
