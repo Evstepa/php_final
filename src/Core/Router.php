@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
 
@@ -30,9 +31,34 @@ class Router
 
     public static function processRequest(Request $request): ?Response
     {
-        var_dump($request->getRoute(), $request->getMethod(), $request->getData());
-        echo "<br>--------<br>";
+        $app = new App();
+        var_dump($app);
+        // var_dump($app->getService('UserController'));
+        var_dump(App::getService('UserController'));
 
+        $parseUrl = parse_url($request->getRoute());
+        // var_dump($parseUrl);
+
+        $callback = null;
+
+        if (array_key_exists($parseUrl['path'], self::ROUTES)) {
+            $callback = self::ROUTES[$parseUrl['path']];
+        }
+        // var_dump($callback);
+        // var_dump(0);
+        // if ($callback['method'] != $method) {
+        //     Router::ErrorPage404();
+        //     return;
+        // }
+
+        $params = [];
+        // if (array_key_exists('query', $parseUrl)) {
+        //     $params = explode('=', $parseUrl['query']);
+        // }
+
+        // var_dump(App::getService($callback['action']));
+
+        // return call_user_func_array(App::getService($callback['action']), array_values($params));
 
         return null;
     }

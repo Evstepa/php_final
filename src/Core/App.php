@@ -6,39 +6,64 @@ namespace App\Core;
 
 class App
 {
-    private static $_storage = array();
+    private static $_storage = [];
 
-    /**
-     * Установка значения
-     */
-    public static function setService($key, $value)
+    public function __construct()
     {
-        return self::$_storage[$key] = $value;
+        $this->_storage = $this->setStorage();
     }
 
-    /**
-     * Получение значения
-     */
-    public static function getService($key, $default = null)
+    private function setStorage(): array
     {
-        return (isset(self::$_storage[$key])) ? self::$_storage[$key] : $default;
+        $searchRoot = $_SERVER["DOCUMENT_ROOT"] . "/src";
+        $fileName = '.php';
+        $searchResult = [];
+        $this->searchFiles($searchRoot, $fileName, $searchResult);
+        $searchResult = array_filter($searchResult, "filesize");
+
+        $serveces = [];
+        foreach ($searchResult as $key => $item) {
+            $itemArray = explode('/', $item);
+            $serviceName = explode('.', $itemArray[sizeof($itemArray) - 1])[0];
+
+            $serveces[$serviceName] = str_ireplace($searchRoot, "", $item);
+        }
+
+        return $serveces;
     }
 
-    /**
-     * Удаление
-     */
-    public static function removeService($key): bool
+    private function searchFiles(string $currentRoot, string $fileName, array &$searchResult): void
     {
-        unset(self::$_storage[$key]);
-        return true;
+        if (!is_dir($currentRoot)) {
+            if (strrpos($currentRoot, $fileName)) {
+                $searchResult[] = $currentRoot;
+            }
+            return;
+        }
+
+        $files = scandir($currentRoot);
+        for ($i = 0; $i < count($files); $i++) {
+            if (
+                is_dir($currentRoot)
+                && !(strrpos($currentRoot, '/.') || strrpos($currentRoot, '/..'))
+            ) {
+                $this->searchFiles($currentRoot . "/" . $files[$i],  $fileName, $searchResult);
+            }
+        }
     }
 
-    /**
-     * Очистка
-     */
-    public static function cleanService(): bool
+    public function getStorage(): array
     {
-        self::$_storage = array();
-        return true;
+        return $this->_storage;
+    }
+
+    public static function getService($key, $default = null): ?string
+    {
+        $currentKey = explode('::', $key);
+        if (array_key_exists($currentKey[0], self::$_storage)) {
+            require_once(self::$_storage[$currentKey[0]]);
+            return $currentKey[1];
+        }
+        return $default;
     }
 }

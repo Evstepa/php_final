@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use App\Core\Db;
-use App\Core\Request;
+use App\Core\App;
 use App\Core\Router;
+use App\Core\Request;
 
 require_once 'vendor/autoload.php';
 
@@ -18,20 +19,22 @@ header('Content-type: application/json; charset=utf-8');
 // echo __DIR__;
 // echo "<br>--------<br>";
 
-// var_dump($_SERVER);
-var_dump($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+// var_dump($_SERVER["DOCUMENT_ROOT"]);
+// var_dump($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
 // echo "<br>--------<br>";
-var_dump($_GET);
+// var_dump($_GET);
 // echo "<br>--------<br>";
-var_dump($_POST);
+// var_dump($_POST);
 // echo "<br>--------<br>";
 
-// $request = new Request();
+// $app = new App();
+// var_dump($app->getStorage());
+$request = new Request();
 
 // var_dump($request->getRoute(), $request->getMethod(), $request->getData());
 // echo "<br>--------<br>";
 
-// $router = Router::processRequest($request);
+Router::processRequest($request);
 
 // var_dump($db->getConnection());
 
