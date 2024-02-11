@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core;
 
 class App
@@ -25,7 +27,7 @@ class App
     /**
      * Удаление
      */
-    public static function removeService($key)
+    public static function removeService($key): bool
     {
         unset(self::$_storage[$key]);
         return true;
@@ -34,7 +36,7 @@ class App
     /**
      * Очистка
      */
-    public static function cleanService()
+    public static function cleanService(): bool
     {
         self::$_storage = array();
         return true;

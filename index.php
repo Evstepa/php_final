@@ -3,24 +3,35 @@
 declare(strict_types=1);
 
 use App\Core\Db;
+use App\Core\Request;
 use App\Core\Router;
 
 require_once 'vendor/autoload.php';
 
 $db = Db::getInstance();
 
-// header('Content-type: application/json; charset=utf-8');
-var_dump(json_encode($db->findAll()));
+header('Content-type: application/json; charset=utf-8');
+// var_dump(json_encode($db->findAll()));
 
-echo "<br>--------<br>";
+// echo "<br>--------<br>";
 
-echo __DIR__;
-echo "<br>--------<br>";
+// echo __DIR__;
+// echo "<br>--------<br>";
 
+// var_dump($_SERVER);
 var_dump($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-echo "<br>--------<br>";
+// echo "<br>--------<br>";
+var_dump($_GET);
+// echo "<br>--------<br>";
+var_dump($_POST);
+// echo "<br>--------<br>";
 
-Router::execute($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+// $request = new Request();
+
+// var_dump($request->getRoute(), $request->getMethod(), $request->getData());
+// echo "<br>--------<br>";
+
+// $router = Router::processRequest($request);
 
 // var_dump($db->getConnection());
 
