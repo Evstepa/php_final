@@ -6,7 +6,7 @@ namespace App\Core;
 
 class App
 {
-    private static $_storage = [];
+    public $_storage = [];
 
     public function __construct()
     {
@@ -26,7 +26,8 @@ class App
             $itemArray = explode('/', $item);
             $serviceName = explode('.', $itemArray[sizeof($itemArray) - 1])[0];
 
-            $serveces[$serviceName] = str_ireplace($searchRoot, "", $item);
+            $serveces[$serviceName] = $item;
+            // $serveces[$serviceName] = str_ireplace($searchRoot, "", $item);
         }
 
         return $serveces;
@@ -57,11 +58,11 @@ class App
         return $this->_storage;
     }
 
-    public static function getService($key, $default = null): ?string
+    public function getService($key, $default = null): ?string
     {
         $currentKey = explode('::', $key);
-        if (array_key_exists($currentKey[0], self::$_storage)) {
-            require_once(self::$_storage[$currentKey[0]]);
+        if (array_key_exists($currentKey[0], $this->_storage)) {
+            require_once($this->_storage[$currentKey[0]]);
             return $currentKey[1];
         }
         return $default;

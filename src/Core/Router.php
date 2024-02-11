@@ -32,9 +32,9 @@ class Router
     public static function processRequest(Request $request): ?Response
     {
         $app = new App();
-        var_dump($app);
+        // var_dump($app);
         // var_dump($app->getService('UserController'));
-        var_dump(App::getService('UserController'));
+        // var_dump(App::getService('UserController'));
 
         $parseUrl = parse_url($request->getRoute());
         // var_dump($parseUrl);
@@ -56,11 +56,11 @@ class Router
         //     $params = explode('=', $parseUrl['query']);
         // }
 
-        // var_dump(App::getService($callback['action']));
+        var_dump($app->getService($callback['action']));
 
-        // return call_user_func_array(App::getService($callback['action']), array_values($params));
+        return call_user_func_array($app->getService($callback['action']), array_values($params));
 
-        return null;
+        // return null;
     }
 
     // public static function execute(string $url, string $method)
