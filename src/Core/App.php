@@ -6,19 +6,14 @@ namespace App\Core;
 
 class App
 {
-    public $_storage = [];
+    public static $_storage = [];
 
-    public function __construct()
-    {
-        $this->_storage = $this->setStorage();
-    }
-
-    private function setStorage(): array
+    private static function setStorage(): array
     {
         $searchRoot = $_SERVER["DOCUMENT_ROOT"] . "/src";
         $fileName = '.php';
         $searchResult = [];
-        $this->searchFiles($searchRoot, $fileName, $searchResult);
+        self::searchFiles($searchRoot, $fileName, $searchResult);
         $searchResult = array_filter($searchResult, "filesize");
 
         $serveces = [];
@@ -27,13 +22,12 @@ class App
             $serviceName = explode('.', $itemArray[sizeof($itemArray) - 1])[0];
 
             $serveces[$serviceName] = $item;
-            // $serveces[$serviceName] = str_ireplace($searchRoot, "", $item);
+            // $serveces[$serviceName] = str_ireplace($searchRoot, "App", $item);
         }
-
         return $serveces;
     }
 
-    private function searchFiles(string $currentRoot, string $fileName, array &$searchResult): void
+    private static function searchFiles(string $currentRoot, string $fileName, array &$searchResult): void
     {
         if (!is_dir($currentRoot)) {
             if (strrpos($currentRoot, $fileName)) {
@@ -48,22 +42,24 @@ class App
                 is_dir($currentRoot)
                 && !(strrpos($currentRoot, '/.') || strrpos($currentRoot, '/..'))
             ) {
-                $this->searchFiles($currentRoot . "/" . $files[$i],  $fileName, $searchResult);
+                self::searchFiles($currentRoot . "/" . $files[$i],  $fileName, $searchResult);
             }
         }
     }
 
-    public function getStorage(): array
+    public static function getNamespace(string $name): string
     {
-        return $this->_storage;
+        $searchRoot = $_SERVER["DOCUMENT_ROOT"] . "/src";
+        $name = str_ireplace($searchRoot, "App", $name);
+        $name = str_ireplace('/', '\\', $name);
+        return explode('.', $name)[0];
     }
 
-    public function getService($key, $default = null): ?string
+    public static function getService($key, $default = null)
     {
-        $currentKey = explode('::', $key);
-        if (array_key_exists($currentKey[0], $this->_storage)) {
-            require_once($this->_storage[$currentKey[0]]);
-            return $currentKey[1];
+        self::$_storage = self::setStorage();
+        if (array_key_exists($key, self::$_storage)) {
+            return self::getNamespace(self::$_storage[$key]);
         }
         return $default;
     }

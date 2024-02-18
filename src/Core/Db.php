@@ -85,7 +85,7 @@ class Db
      * @param array $criteria
      * @return array
      */
-    public function findBy(array $criteria): array
+    public function findBy(array $criteria): ?array
     {
         $pattern = '%' . array_values($criteria)[0] . '%';
         $sql = sprintf("SELECT * FROM user WHERE %s LIKE :pattern", array_keys($criteria)[0]);

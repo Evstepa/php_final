@@ -9,15 +9,29 @@ use App\Service\UserProvider;
 
 class UserController
 {
+    private UserProvider $userProvider;
+
+    public function __construct()
+    {
+        $this->userProvider = new UserProvider();
+    }
+
     /**
-     * route('/user/list', name='userList')
+     * route('/user/list')
      *
-     * @return void
+     * @return string
      */
-    public function getUserList(UserProvider $userProvider): string
+    public function getUserList(): string
     {
         return json_encode([
-            'users' => $userProvider->getUserList()
+            'users' => $this->userProvider->getUserList()
+        ]);
+    }
+
+    public function getUser(int $id): string
+    {
+        return json_encode([
+            'user' => $this->userProvider->getUser($id)
         ]);
     }
 }

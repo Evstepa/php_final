@@ -13,9 +13,14 @@ class Router
     const ROUTES = [
         "/user/list" => [
             'method' => 'GET',
-            'action' => 'UserController::getUsetList',
+            'controller' => 'UserController',
+            'action' => 'getUserList',
         ],
-        "/user/get/{id}" => "",
+        "/user/get/{id}" => [
+            'method' => 'GET',
+            'controller' => 'UserController',
+            'action' => 'getUser',
+        ],
         "/user/update" => "",
         "/user/login" => "",
         "/user/logout" => "",
@@ -29,38 +34,54 @@ class Router
     {
     }
 
-    public static function processRequest(Request $request): ?Response
+    private static function parseUrl(Request $request): array
     {
-        $app = new App();
-        // var_dump($app);
-        // var_dump($app->getService('UserController'));
-        // var_dump(App::getService('UserController'));
-
         $parseUrl = parse_url($request->getRoute());
-        // var_dump($parseUrl);
+        $url = $parseUrl['path'];
+
+        if (ctype_digit(substr($url, strripos($url, '/') + 1))) {
+            $parseUrl = [
+                'query' => 'id=' . substr($url, strripos($url, '/', -1) + 1),
+            ];
+            $parseUrl['path'] = substr($url, 0, strripos($url, '/', -1) + 1) . '{id}';
+        }
+        return $parseUrl;
+    }
+
+    public static function processRequest(Request $request): Response
+    {
+        $parseUrl = self::parseUrl($request);
 
         $callback = null;
 
         if (array_key_exists($parseUrl['path'], self::ROUTES)) {
             $callback = self::ROUTES[$parseUrl['path']];
         }
-        // var_dump($callback);
-        // var_dump(0);
+
         // if ($callback['method'] != $method) {
         //     Router::ErrorPage404();
         //     return;
         // }
 
         $params = [];
-        // if (array_key_exists('query', $parseUrl)) {
-        //     $params = explode('=', $parseUrl['query']);
-        // }
+        if (array_key_exists('query', $parseUrl)) {
+            $query = explode('=', $parseUrl['query']);
+            $params[$query[0]] = $query[1];
+        }
+        foreach ($params as $key => $value) {
+            if (ctype_digit($value)) {
+                $params[$key] = (int) $value;
+            }
+        }
 
-        var_dump($app->getService($callback['action']));
+        $className = App::getService($callback['controller']);
+        $obj = new $className;
 
-        return call_user_func_array($app->getService($callback['action']), array_values($params));
+        // $answer = call_user_func([$obj, $callback['action']]);
 
-        // return null;
+        $answer = call_user_func_array([$obj, $callback['action']], array_values($params));
+
+        return new Response($answer);
     }
 
     // public static function execute(string $url, string $method)
