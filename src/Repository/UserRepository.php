@@ -29,16 +29,22 @@ final class UserRepository extends Db
     public function findAllGeneralData(): array
     {
         $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
-        $state = $this->currentConnect->prepare($sql);
-        $state->execute();
-        return $state->fetchAll();
+        return $this->findAll($sql);
     }
 
-    public function findById(int $id): array
+    /**
+     * @param array $criteria
+     * @return array|null
+     */
+    public function findOneBy(array $criteria): ?array
     {
-        $sql = sprintf("SELECT id, name, surname, age FROM user WHERE id = :id");
-        $state = $this->currentConnect->prepare($sql);
-        $state->execute(['id' => $id]);
-        return $state->fetchAll();
+        $sql = sprintf("SELECT id, name, surname, age FROM user WHERE %s = %s", array_keys($criteria)[0], array_keys($criteria)[0]);
+        return $this->findOne($sql);
+    }
+
+    public function findlLast(): ?array
+    {
+        $sql = sprintf("SELECT * FROM user ORDER BY id DESC LIMIT 1");
+        return $this->findOne($sql);
     }
 }

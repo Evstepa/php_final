@@ -9,8 +9,6 @@ use Exception;
 
 class Db
 {
-    public string $tableName;
-
     protected PDO $connect;
 
     private static $instance = null;
@@ -27,9 +25,9 @@ class Db
     private function __construct()
     {
         $this->connect = new PDO(
-            'mysql:host=127.0.0.1; dbname=cloud_storage; port=3306',
-            'root',
-            '',
+            DB_CONFIG,
+            DB_LOGIN,
+            DB_PASSWORD,
             [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
         );
     }
@@ -49,48 +47,36 @@ class Db
     }
 
     /**
-     * @return array
+     * @param string $sql
+     * @return array|null
      */
-    public function findAll(): array
+    public function findAll(string $sql): ?array
     {
-        $state = $this->connect->prepare("SELECT * FROM user WHERE 1");
+        $db = self::getInstance();
+        $state = $db->connect->prepare($sql);
         $state->execute();
-        return $state->fetchAll();
+        $answer = $state->fetchAll();
+        $errorCode = $state->errorCode() === '00000' ? (!$answer ? 403 : 200) : $state->errorCode();
+        return [
+            'answer' => $answer,
+            'status' => $errorCode,
+        ];
     }
 
     /**
-     * @param int $id
+     * @param string $sql
      * @return array|null
      */
-    public function find(int $id): ?array
+    public function findOne(string $sql): ?array
     {
-        $state = $this->connect->prepare("SELECT * FROM user WHERE id = :id");
-        $state->execute(['id' => $id]);
-        return $state->fetch();
-    }
-
-    /**
-     * @param array $criteria
-     * @return array|null
-     */
-    public function findOneBy(array $criteria): ?array
-    {
-        $sql = sprintf("SELECT * FROM user WHERE %s = :%s", array_keys($criteria)[0], array_keys($criteria)[0]);
-        $state = $this->connect->prepare($sql);
-        $state->execute($criteria);
-        return $state->fetch();
-    }
-
-    /**
-     * @param array $criteria
-     * @return array
-     */
-    public function findBy(array $criteria): ?array
-    {
-        $pattern = '%' . array_values($criteria)[0] . '%';
-        $sql = sprintf("SELECT * FROM user WHERE %s LIKE :pattern", array_keys($criteria)[0]);
-        $state = $this->connect->prepare($sql);
-        $state->execute([':pattern' => $pattern]);
-        return $state->fetchAll();
+        $db = self::getInstance();
+        $state = $db->connect->prepare($sql);
+        $state->execute();
+        $answer = $state->fetch();
+        $errorCode = $state->errorCode() === '00000' ? (!$answer ? 403 : 200) : $state->errorCode();
+        return [
+            'answer' => $answer,
+            'status' => $errorCode,
+        ];
     }
 }

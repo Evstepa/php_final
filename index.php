@@ -6,7 +6,11 @@ use App\Core\Router;
 use App\Core\Request;
 
 require_once 'vendor/autoload.php';
-require_once 'autoload.php';
+
+require_once('./src/Config/routes.php');
+require_once('./src/Config/const.php');
+require_once('./src/Config/textMessages.php');
+// require_once 'autoload.php';
 
 $request = new Request();
 

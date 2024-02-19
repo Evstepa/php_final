@@ -6,19 +6,15 @@ namespace App\Core;
 
 class Response
 {
-    public const STATUS = [
-        '200' => '200 OK',
-        '404' => 'HTTP/1.0 404 Not Found',
-    ];
     public string $data;
     public array $headers;
 
-    public function __construct($data)
+    public function __construct(string $data)
     {
         $this->setData($data);
     }
 
-    public function setData($data)
+    public function setData(string $data): void
     {
         if ($data) {
             $this->setHeaders('200');
@@ -26,12 +22,11 @@ class Response
             $this->setHeaders('404');
         }
         $this->data = $data;
-        // $this->data = json_encode($data);
     }
 
     public function setHeaders(string $status)
     {
         $this->headers[] = 'Content-type: application/json; charset=utf-8';
-        $this->headers[] = self::STATUS[$status];
+        $this->headers[] = STATUS_MESSAGES[$status];
     }
 }

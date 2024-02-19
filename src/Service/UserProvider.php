@@ -22,6 +22,6 @@ class UserProvider
 
     public function getUser(int $id): ?array
     {
-        return $this->userRepository->findById($id);
+        return $this->userRepository->findOneBy(['id' => $id]);
     }
 }

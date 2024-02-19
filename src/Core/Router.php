@@ -10,23 +10,6 @@ use App\Core\Response;
 
 class Router
 {
-    const ROUTES = [
-        "/user/list" => [
-            'method' => 'GET',
-            'controller' => 'UserController',
-            'action' => 'getUserList',
-        ],
-        "/user/get/{id}" => [
-            'method' => 'GET',
-            'controller' => 'UserController',
-            'action' => 'getUser',
-        ],
-        "/user/update" => "",
-        "/user/login" => "",
-        "/user/logout" => "",
-        "/user/reset_password" => "",
-    ];
-
     private function __construct()
     {
     }
@@ -54,8 +37,8 @@ class Router
 
         $callback = null;
 
-        if (array_key_exists($parseUrl['path'], self::ROUTES)) {
-            $callback = self::ROUTES[$parseUrl['path']];
+        if (array_key_exists($parseUrl['path'], ROUTES)) {
+            $callback = ROUTES[$parseUrl['path']];
         }
 
         // if ($callback['method'] != $method) {
@@ -77,38 +60,10 @@ class Router
         $className = App::getService($callback['controller']);
         $obj = new $className;
 
-        // $answer = call_user_func([$obj, $callback['action']]);
-
         $answer = call_user_func_array([$obj, $callback['action']], array_values($params));
 
         return new Response($answer);
     }
-
-    // public static function execute(string $url, string $method)
-    // {
-    //     $parseUrl = parse_url($url);
-    //     var_dump($parseUrl);
-
-    //     $callback = null;
-
-    //     if (array_key_exists($parseUrl['path'], self::ROUTES)) {
-    //         $callback = self::ROUTES[$parseUrl['path']];
-    //     }
-    //     var_dump($callback);
-    //     // if ($callback['method'] != $method) {
-    //     //     Router::ErrorPage404();
-    //     //     return;
-    //     // }
-
-    //     $params = [];
-    //     if (array_key_exists('query', $parseUrl)) {
-    //         $params = explode('=', $parseUrl['query']);
-    //     }
-
-    //     var_dump($params);
-
-    //     return call_user_func_array(App::getService($callback['action']), array_values($params));
-    // }
 
     // public static function ErrorPage404()
     // {

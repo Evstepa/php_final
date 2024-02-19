@@ -17,7 +17,7 @@ class UserController
     }
 
     /**
-     * route('/user/list')
+     * route('/users/list')
      *
      * @return string
      */
@@ -28,6 +28,12 @@ class UserController
         ]);
     }
 
+    /**
+     * route('/users/get/{id}')
+     *
+     * @param integer $id
+     * @return string
+     */
     public function getUser(int $id): string
     {
         return json_encode([

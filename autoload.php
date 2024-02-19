@@ -50,6 +50,13 @@ function LoadServices(string $classname): void
     }
 }
 
+// function searchFiles(): void
+// {
+//     $searchRoot = $_SERVER["DOCUMENT_ROOT"] . "/src";
+//     $files = scandir($searchRoot);
+//     var_dump($files);
+// }
+
 spl_autoload_register('LoadControllers');
 spl_autoload_register('LoadEntities');
 spl_autoload_register('LoadRepositories');
