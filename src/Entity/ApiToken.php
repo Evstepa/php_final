@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\User;
+use DateTimeInterface;
 use App\Repository\ApiTokenRepository;
 // use Doctrine\DBAL\Types\Types;
 // use Doctrine\ORM\Mapping as ORM;
@@ -13,7 +14,7 @@ class ApiToken
 
     private string $token;
 
-    // private DateTimeInterface $expiresAt;
+    private DateTimeInterface $expiresAt;
 
     private ?User $user = null;
 
@@ -21,7 +22,7 @@ class ApiToken
     {
         $this->user = $user;
         $this->token = sha1(uniqid('token'));
-        // $this->expiresAt = new \DateTime('+1 day');
+        $this->expiresAt = new \DateTime('+1 day');
     }
 
     public function getId(): ?int
@@ -34,18 +35,18 @@ class ApiToken
         return $this->token;
     }
 
-    // public function getExpiresAt(): ?\DateTimeInterface
-    // {
-    //     return $this->expiresAt;
-    // }
+    public function getExpiresAt(): ?DateTimeInterface
+    {
+        return $this->expiresAt;
+    }
 
     public function getUser(): ?User
     {
         return $this->user;
     }
 
-    // public function isExpired()
-    // {
-    //     return $this->getExpiresAt() <= new \DateTime();
-    // }
+    public function isExpired()
+    {
+        return $this->getExpiresAt() <= new \DateTime();
+    }
 }

@@ -1,6 +1,11 @@
 <?php
 
 const ROUTES = [
+    "/" => [
+        'method' => 'GET',
+        'controller' => '',
+        'action' => '',
+    ],
     "/users/list" => [
         'method' => 'GET',
         'controller' => 'UserController',
@@ -15,6 +20,11 @@ const ROUTES = [
         'method' => 'PUT',
         'controller' => 'UserController',
         'action' => 'updateUser',
+    ],
+    "/users/register" => [
+        'method' => 'POST',
+        'controller' => 'UserController',
+        'action' => 'registerUser',
     ],
     "/users/login" => [
         'method' => 'POST',

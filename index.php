@@ -13,11 +13,12 @@ require_once('./src/Config/textMessages.php');
 // require_once 'autoload.php';
 
 $request = new Request();
+// var_dump($request);
 
-// echo "<pre>";
-// var_dump($request->getRoute(), $request->getMethod(), $request->getData());
-// echo "</pre>";
-
+if ($request->getRoute() === '/') {
+    echo 'Hello!';
+    return;
+}
 $response = Router::processRequest($request);
 foreach ($response->headers as $item) {
     header($item);

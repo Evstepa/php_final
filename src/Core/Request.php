@@ -68,7 +68,6 @@ class Request
                 break;
         }
 
-
         $this->data = $data;
     }
 

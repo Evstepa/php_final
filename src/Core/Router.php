@@ -33,34 +33,40 @@ class Router
 
     public static function processRequest(Request $request): Response
     {
+        // var_dump($request);
         $parseUrl = self::parseUrl($request);
+        // var_dump($parseUrl);
 
         $callback = null;
 
         if (array_key_exists($parseUrl['path'], ROUTES)) {
             $callback = ROUTES[$parseUrl['path']];
         }
+        // var_dump($callback);
 
         // if ($callback['method'] != $method) {
         //     Router::ErrorPage404();
         //     return;
         // }
 
-        $params = [];
+        $params = !is_null($request->getData()) ? $request->getData() : [];
         if (array_key_exists('query', $parseUrl)) {
             $query = explode('=', $parseUrl['query']);
             $params[$query[0]] = $query[1];
-        }
-        foreach ($params as $key => $value) {
-            if (ctype_digit($value)) {
-                $params[$key] = (int) $value;
+            foreach ($params as $key => $value) {
+                if (ctype_digit($value)) {
+                    $params[$key] = (int) $value;
+                }
             }
         }
+        // var_dump($params);
+        // die();
 
         $className = App::getService($callback['controller']);
+        // var_dump($className);
         $obj = new $className;
 
-        $answer = call_user_func_array([$obj, $callback['action']], array_values($params));
+        $answer = call_user_func([$obj, $callback['action']], $params);
 
         return new Response($answer);
     }

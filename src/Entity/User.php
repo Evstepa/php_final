@@ -31,6 +31,11 @@ final class User
 
     private DateTime $updatedAt;
 
+    public function __construct()
+    {
+        $this->createdAt = new DateTime();
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -89,7 +94,7 @@ final class User
 
     public function getSurname(): ?string
     {
-        return $this->name;
+        return $this->surname;
     }
 
     public function setSurname(?string $surname): self
@@ -106,7 +111,7 @@ final class User
 
     public function setFolder(): self
     {
-        $this->folder = sprintf("%s_%s_%s", $this->name, $this->surname, $this->createdAt);
+        $this->folder = sprintf("%s_%s_%s", $this->name, $this->surname, $this->getCreatedAt()->format('y-m-d'));
 
         return $this;
     }
@@ -145,8 +150,9 @@ final class User
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(): DateTime
+    public function setUpdatedAt(): self
     {
-        return $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTime();
+        return $this;
     }
 }
