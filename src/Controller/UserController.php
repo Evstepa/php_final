@@ -20,48 +20,40 @@ class UserController
     /**
      * route('/users/list')
      *
-     * @return string
+     * @return array
      */
-    public function getUserList(): string
+    public function getUserList(): array
     {
-        return json_encode([
-            'users' => $this->userProvider->getUserList()
-        ]);
+        return $this->userProvider->getUserList();
     }
 
     /**
      * route('/users/get/{id}')
      *
      * @param integer $id
-     * @return string
+     * @return array
      */
-    public function getUser(array $user): string
+    public function getUser(array $user): array
     {
-        return json_encode([
-            'user' => $this->userProvider->getUser($user['id'])
-        ]);
+        return $this->userProvider->getUser($user['id']);
     }
 
     /**
      * route('/users/register')
      *
      * @param
-     * @return string
+     * @return array
      */
-    public function registerUser(array $user): string
+    public function registerUser(array $user): array
     {
-        return json_encode([
-            'status' => $this->userProvider->registerUser($user)
-        ]);
+        return $this->userProvider->registerUser($user);
     }
 
-    public function loginUser(array $user): string
+    public function loginUser(array $user): array
     {
-        return json_encode([
-            'token' => $this->userProvider->registerUser([
-                'email' => $user['email'],
-                'password' => $user['password'],
-            ])
+        return $this->userProvider->loginUser([
+            'email' => $user['email'],
+            'password' => $user['password'],
         ]);
     }
 }

@@ -155,4 +155,36 @@ final class User
         $this->updatedAt = new DateTime();
         return $this;
     }
+
+    public function fillUserData(array $userData): self
+    {
+        if (isset($userData['email'])) {
+            $this->setEmail($userData['email']);
+        }
+        if (isset($userData['password'])) {
+            $this->setPassword($userData['password']);
+        }
+        if ($userData['name']) {
+            $this->setName($userData['name']);
+        }
+        if (isset($userData['surname'])) {
+            $this->setSurname($userData['surname']);
+        }
+        if (isset($userData['age'])) {
+            $this->setAge((int) $userData['age']);
+        }
+        if (isset($userData['roles'])) {
+            $this->setAge((int) $userData['roles']);
+        }
+        if (isset($userData['folder'])) {
+            $this->setAge((int) $userData['folder']);
+        }
+        if (isset($userData['createdAt'])) {
+            $this->setAge((int) $userData['createdAt']);
+        }
+        if (isset($userData['updatedAt'])) {
+            $this->setAge((int) $userData['updatedAt']);
+        }
+        return $this;
+    }
 }

@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\ApiToken;
 use DateTime;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\ApiTokenRepository;
 
 class UserProvider
 {
     public UserRepository $userRepository;
+    public ApiTokenRepository $apiTokenRepository;
 
     public function __construct()
     {
@@ -22,46 +25,56 @@ class UserProvider
         return $this->userRepository->findAllGeneralData();
     }
 
-    public function getUser(int $id): ?array
+    public function getUser(int $id): array
     {
         return $this->userRepository->findOneBy(['id' => $id]);
     }
 
-    public function registerUser(array $user): string
+    public function registerUser(array $userData): array
     {
-        $newUser = new User();
-        if (isset($user['email'])) {
-            $newUser->setEmail($user['email']);
-        }
-        if (isset($user['password'])) {
-            $newUser->setPassword($user['password']);
-        }
-        if ($user['name']) {
-            $newUser->setName($user['name']);
-        }
-        if (isset($user['surname'])) {
-            $newUser->setSurname($user['surname']);
-        }
-        if (isset($user['age'])) {
-            $newUser->setAge((int) $user['age']);
-        }
-        $newUser->setRoles(['ROLE_USER']);
-        $newUser->setFolder();
-        $newUser->setUpdatedAt();
-        return $this->userRepository->create($newUser);
-    }
+        $answer = $this->userRepository->findOneBy(['email' => $userData['email']]);
 
-    public function loginUser(array $user): ?array
-    {
-        $answer = $this->userRepository->findOneBy([
-            'email' => $user['email'],
-            // 'password' => $user['password'],
-        ]);
-        if (empty($answer)) {
+        if ($answer['body']) {
             return [
-                'body' => '',
-                'status' => '404',
+                'body' => ERROR_MESSAGES['403'],
+                'status' => 403,
             ];
         }
+
+        $user = new User();
+        $user->fillUserData($userData);
+        $user->setRoles(['ROLE_USER']);
+        $user->setFolder();
+        $user->setUpdatedAt();
+        return $this->userRepository->create($user);
+    }
+
+    public function loginUser(array $userData): array //делать
+    {
+        $sql = sprintf("SELECT * FROM user WHERE email = '%s'", $userData['email']);
+        $answer = $this->userRepository->findOne($sql);
+
+        if (!$answer['body']) {
+            return [
+                'body' => '',
+                'status' => 404,
+            ];
+        }
+
+        if ($answer['body']['password'] != $userData['password']) {
+            return [
+                'body' => '',
+                'status' => 401,
+            ];
+        }
+
+        $user = new User();
+        $user->fillUserData($answer['body']);
+        $apiToken = new ApiToken($user);
+        $this->apiTokenRepository->create();
+        session_start();
+
+
+        return $answer;
     }
 }

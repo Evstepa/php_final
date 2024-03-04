@@ -58,7 +58,7 @@ class Db
         $answer = $state->fetchAll();
         $errorCode = $state->errorCode() === '00000' ? (!$answer ? 403 : 200) : $state->errorCode();
         return [
-            'answer' => $answer,
+            'body' => $answer,
             'status' => $errorCode,
         ];
     }
@@ -75,7 +75,7 @@ class Db
         $answer = $state->fetch();
         $errorCode = $state->errorCode() === '00000' ? (!$answer ? 403 : 200) : $state->errorCode();
         return [
-            'answer' => $answer,
+            'body' => $answer,
             'status' => $errorCode,
         ];
     }

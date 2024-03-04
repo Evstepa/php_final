@@ -12,7 +12,7 @@ class ApiToken
 {
     private int $id;
 
-    private string $token;
+    private string $apiToken;
 
     private DateTimeInterface $expiresAt;
 
@@ -21,7 +21,7 @@ class ApiToken
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->token = sha1(uniqid('token'));
+        $this->setToken();
         $this->expiresAt = new \DateTime('+1 day');
     }
 
@@ -32,7 +32,22 @@ class ApiToken
 
     public function getToken(): ?string
     {
-        return $this->token;
+        return $this->apiToken;
+    }
+
+    public function setToken(): void
+    {
+        $this->apiToken = sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
     }
 
     public function getExpiresAt(): ?DateTimeInterface

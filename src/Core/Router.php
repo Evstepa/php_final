@@ -67,6 +67,8 @@ class Router
         $obj = new $className;
 
         $answer = call_user_func([$obj, $callback['action']], $params);
+        // var_dump($answer);
+        // die();
 
         return new Response($answer);
     }

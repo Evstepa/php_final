@@ -18,16 +18,8 @@ final class UserRepository extends Db
         $this->currentConnect = self::getInstance()->getConnection();
     }
 
-    public function create(User $user): string
+    public function create(User $user): array
     {
-        $answer = $this->findOneBy(['email' => $user->getEmail()]);
-
-        if (!isset($answer)) {
-            return '23000';
-        }
-
-        $status = '200';
-
         $state = $this->currentConnect->prepare(
             "INSERT INTO user (id, email, password, name, surname, age, folder, role, createdAt, updatedAt)
              VALUES (null, :email, :password, :name, :surname, :age, :folder, :role, :createdAt, :updatedAt)"
@@ -49,13 +41,19 @@ final class UserRepository extends Db
             );
         } catch (PDOException $e) {
             $state->debugDumpParams();
-            $status = $e->getCode();
+            return [
+                'body' => $e->getMessage(),
+                'status' => $e->getCode(),
+            ];
         }
 
-        return $status;
+        return [
+            'body' => 'Пользователь успешно создан',
+            'status' => 200,
+        ];
     }
 
-    public function findAllGeneralData(): ?array
+    public function findAllGeneralData(): array
     {
         $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
         $answer = $this->findAll($sql);
@@ -66,14 +64,14 @@ final class UserRepository extends Db
      * @param array $criteria
      * @return array|null
      */
-    public function findOneBy(array $criteria): ?array
+    public function findOneBy(array $criteria): array
     {
         $sql = sprintf("SELECT id, name, surname, age FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
         $answer = $this->findOne($sql);
         return $answer;
     }
 
-    public function findlLast(): ?array
+    public function findlLast(): array
     {
         $sql = sprintf("SELECT * FROM user ORDER BY id DESC LIMIT 1");
         $answer = $this->findOne($sql);

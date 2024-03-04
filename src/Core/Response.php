@@ -6,27 +6,29 @@ namespace App\Core;
 
 class Response
 {
-    public string $data;
+    public string $body;
     public array $headers;
+    public int $status;
 
-    public function __construct(string $data)
+    public function __construct(array $data)
     {
         $this->setData($data);
     }
 
-    public function setData(string $data): void
+    public function setData(array $data): void
     {
-        if ($data) {
-            $this->setHeaders('200');
-        } else {
-            $this->setHeaders('404');
-        }
-        $this->data = $data;
+        $this->body = json_encode($data['body']);
+        $this->status = $data['status'];
+        $this->headers[] = 'Content-type: application/json; charset=utf-8';
+        $this->headers[] = STATUS_MESSAGES[$this->status];
     }
 
-    public function setHeaders(string $status)
+    public function send(): void
     {
-        $this->headers[] = 'Content-type: application/json; charset=utf-8';
-        $this->headers[] = STATUS_MESSAGES[$status];
+        foreach ($this->headers as $item) {
+            header($item);
+        }
+        http_response_code($this->status);
+        echo $this->body;
     }
 }
