@@ -18,7 +18,7 @@ class UserController
     }
 
     /**
-     * route('/users/list')
+     * route('/users/list', method='GET')
      *
      * @return array
      */
@@ -28,7 +28,7 @@ class UserController
     }
 
     /**
-     * route('/users/get/{id}')
+     * route('/users/get/{id}', method='GET')
      *
      * @param integer $id
      * @return array
@@ -39,7 +39,7 @@ class UserController
     }
 
     /**
-     * route('/users/register')
+     * route('/users/register', method='POST')
      *
      * @param
      * @return array
@@ -49,11 +49,22 @@ class UserController
         return $this->userProvider->registerUser($user);
     }
 
+    /**
+     * route('/users/login', method='POST'))
+     *
+     * @param array $user
+     * @return array
+     */
     public function loginUser(array $user): array
     {
         return $this->userProvider->loginUser([
             'email' => $user['email'],
             'password' => $user['password'],
         ]);
+    }
+
+    public function updateUser(array $user): array
+    {
+        return $this->userProvider->updateUser($user);
     }
 }

@@ -56,24 +56,53 @@ class UserProvider
 
         if (!$answer['body']) {
             return [
-                'body' => '',
+                'body' => ERROR_MESSAGES['404'],
                 'status' => 404,
             ];
         }
 
         if ($answer['body']['password'] != $userData['password']) {
             return [
-                'body' => '',
+                'body' => ERROR_MESSAGES['401'],
                 'status' => 401,
             ];
         }
 
-        $user = new User();
-        $user->fillUserData($answer['body']);
-        $apiToken = new ApiToken($user);
-        $this->apiTokenRepository->create();
         session_start();
 
+        $user = new User();
+        $user->fillUserData($answer['body']);
+
+        $apiToken = new ApiToken($user);
+        $this->apiTokenRepository = new ApiTokenRepository();
+
+        $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());
+        $answer = $this->apiTokenRepository->findOne($sql);
+        if ($answer['body']) {
+            $sql = sprintf("DELETE FROM token WHERE user_id = '%d'", $user->getId());
+            $answer = $this->apiTokenRepository->findOne($sql);
+        }
+
+        $apiToken->setToken();
+        $answer = $this->apiTokenRepository->create($apiToken);
+        if ($answer['status'] != 200) {
+            return [
+                'body' => 'Ошибка создания токена',
+                'status' => $answer['status'],
+            ];
+        }
+
+        $_SESSION["currentUser"] = $apiToken->getToken();
+
+        // var_dump($answer);
+        // die();
+
+        return $answer;
+    }
+
+    public function updateUser(array $userData): array
+    {
+        $answer = [];
 
         return $answer;
     }

@@ -18,12 +18,16 @@ final class UserRepository extends Db
         $this->currentConnect = self::getInstance()->getConnection();
     }
 
+    /**
+     * @param User $user
+     * @return array
+     */
     public function create(User $user): array
     {
-        $state = $this->currentConnect->prepare(
-            "INSERT INTO user (id, email, password, name, surname, age, folder, role, createdAt, updatedAt)
-             VALUES (null, :email, :password, :name, :surname, :age, :folder, :role, :createdAt, :updatedAt)"
-        );
+        $sql = "INSERT INTO user (id, email, password, name, surname, age, folder, role, createdAt, updatedAt)
+             VALUES (null, :email, :password, :name, :surname, :age, :folder, :role, :createdAt, :updatedAt)";
+
+        $state = $this->currentConnect->prepare($sql);
 
         try {
             $state->execute(
@@ -53,6 +57,9 @@ final class UserRepository extends Db
         ];
     }
 
+    /**
+     * @return array
+     */
     public function findAllGeneralData(): array
     {
         $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
@@ -71,6 +78,9 @@ final class UserRepository extends Db
         return $answer;
     }
 
+    /**
+     * @return array
+     */
     public function findlLast(): array
     {
         $sql = sprintf("SELECT * FROM user ORDER BY id DESC LIMIT 1");

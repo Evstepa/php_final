@@ -21,8 +21,8 @@ class ApiToken
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->setToken();
-        $this->expiresAt = new \DateTime('+1 day');
+        // $this->setToken();
+        // $this->expiresAt = new \DateTime('+1 day');
     }
 
     public function getId(): ?int
@@ -48,6 +48,7 @@ class ApiToken
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
+        $this->expiresAt = new \DateTime('+1 day');
     }
 
     public function getExpiresAt(): ?DateTimeInterface

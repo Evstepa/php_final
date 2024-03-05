@@ -13,6 +13,9 @@ require_once('./src/Config/textMessages.php');
 
 $request = new Request();
 
+var_dump($request);
+die();
+
 if ($request->getRoute() === '/') {
     echo 'Hello!';
     return;

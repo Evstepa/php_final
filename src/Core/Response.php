@@ -17,6 +17,8 @@ class Response
 
     public function setData(array $data): void
     {
+        // var_dump($data['status']);
+        // die();
         $this->body = json_encode($data['body']);
         $this->status = $data['status'];
         $this->headers[] = 'Content-type: application/json; charset=utf-8';

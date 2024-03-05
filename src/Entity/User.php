@@ -36,6 +36,12 @@ final class User
         $this->createdAt = new DateTime();
     }
 
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -49,7 +55,6 @@ final class User
     public function setEmail(string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -64,7 +69,6 @@ final class User
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-
         return $this;
     }
 
@@ -76,7 +80,6 @@ final class User
     public function setPassword(string $password): self
     {
         $this->password = $password;
-
         return $this;
     }
 
@@ -88,7 +91,6 @@ final class User
     public function setName(?string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -100,7 +102,6 @@ final class User
     public function setSurname(?string $surname): self
     {
         $this->surname = $surname;
-
         return $this;
     }
 
@@ -111,8 +112,12 @@ final class User
 
     public function setFolder(): self
     {
-        $this->folder = sprintf("%s_%s_%s", $this->name, $this->surname, $this->getCreatedAt()->format('y-m-d'));
-
+        $this->folder = sprintf(
+            "%s_%s_%s",
+            $this->name,
+            $this->surname,
+            $this->getCreatedAt()->format('y-m-d')
+        );
         return $this;
     }
 
@@ -124,7 +129,6 @@ final class User
     public function setApiToken(ApiToken $apiToken): self
     {
         $this->apiToken = $apiToken;
-
         return $this;
     }
 
@@ -136,7 +140,6 @@ final class User
     public function setAge(int $age): self
     {
         $this->age = $age;
-
         return $this;
     }
 
@@ -158,6 +161,9 @@ final class User
 
     public function fillUserData(array $userData): self
     {
+        if (isset($userData['id'])) {
+            $this->setId($userData['id']);
+        }
         if (isset($userData['email'])) {
             $this->setEmail($userData['email']);
         }
