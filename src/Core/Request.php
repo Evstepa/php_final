@@ -52,27 +52,34 @@ class Request
                 break;
             case 'PUT';
             case 'PATCH';
-            case 'DELETE';
-                // PUT, PATCH или DELETE
-                // $exploded = explode('&', file_get_contents('php://input'));
-
-                // foreach($exploded as $pair) {
-                //     $item = explode('=', $pair);
-                //     if (count($item) == 2) {
-                //         $data[urldecode($item[0])] = urldecode($item[1]);
-                //     }
-                // }
+            case 'DELETE':
+                $exploded = explode('&', file_get_contents('php://input'));
+                foreach ($exploded as $pair) {
+                    $item = explode('=', $pair);
+                    if (count($item) == 2) {
+                        $data[urldecode($item[0])] = urldecode($item[1]);
+                    }
+                }
                 break;
             default:
-                # code...
                 break;
         }
 
+        $data['token'] = $this->getAuthToken();
         $this->data = $data;
     }
 
     public function getData(): ?array
     {
         return $this->data;
+    }
+
+    public function getAuthToken(): string
+    {
+        if (!isset(getallheaders()["Authorization"])) {
+            return '';
+        }
+        $authToken = getallheaders()["Authorization"];
+        return trim(str_ireplace('Bearer ', '', $authToken));
     }
 }

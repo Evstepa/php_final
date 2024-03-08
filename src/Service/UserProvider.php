@@ -18,6 +18,7 @@ class UserProvider
     public function __construct()
     {
         $this->userRepository = new UserRepository();
+        $this->apiTokenRepository = new ApiTokenRepository();
     }
 
     public function getUserList()
@@ -49,7 +50,7 @@ class UserProvider
         return $this->userRepository->create($user);
     }
 
-    public function loginUser(array $userData): array //делать
+    public function loginUser(array $userData): array
     {
         $sql = sprintf("SELECT * FROM user WHERE email = '%s'", $userData['email']);
         $answer = $this->userRepository->findOne($sql);
@@ -68,13 +69,11 @@ class UserProvider
             ];
         }
 
-        session_start();
-
         $user = new User();
         $user->fillUserData($answer['body']);
 
         $apiToken = new ApiToken($user);
-        $this->apiTokenRepository = new ApiTokenRepository();
+        // $this->apiTokenRepository = new ApiTokenRepository();
 
         $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());
         $answer = $this->apiTokenRepository->findOne($sql);
@@ -94,15 +93,49 @@ class UserProvider
 
         $_SESSION["currentUser"] = $apiToken->getToken();
 
-        // var_dump($answer);
-        // die();
+        return $answer;
+    }
+
+    public function logoutUser(array $userData): array
+    {
+        // $this->apiTokenRepository = new ApiTokenRepository();
+        $answer = $this->apiTokenRepository->logout($userData);
+
+        unset($_SESSION['currentUser']);
+        // session_destroy();
+
+        header("Location: index.php");
 
         return $answer;
     }
 
     public function updateUser(array $userData): array
     {
-        $answer = [];
+        // составить правильный запрос!!!
+
+        $sql = sprintf("SELECT * FROM token WHERE token = '%s'", $userData['token']);
+        // $this->apiTokenRepository = new ApiTokenRepository();
+        $answer = $this->apiTokenRepository->findOne($sql);
+
+        if (!$answer['body']) {
+            return [
+                'body' => 'Ошибка чтения токена',
+                'status' => $answer['status'],
+            ];
+        }
+
+        $user = new User();
+
+        $sql = sprintf("SELECT * FROM user WHERE id = '%d'", $answer['body']['user_id']);
+        $answer = $this->userRepository->findOne($sql);
+
+        $user->fillUserData($answer['body']);
+        $user->fillUserData($userData);
+
+        $answer = $this->userRepository->updateUser($user);
+
+        var_dump($answer);
+        die();
 
         return $answer;
     }

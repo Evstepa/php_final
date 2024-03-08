@@ -11,10 +11,12 @@ require_once('./src/Config/routes.php');
 require_once('./src/Config/const.php');
 require_once('./src/Config/textMessages.php');
 
+session_start();
+
 $request = new Request();
 
-var_dump($request);
-die();
+// var_dump($request);
+// die();
 
 if ($request->getRoute() === '/') {
     echo 'Hello!';

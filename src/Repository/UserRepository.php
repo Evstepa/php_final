@@ -87,4 +87,33 @@ final class UserRepository extends Db
         $answer = $this->findOne($sql);
         return $answer;
     }
+
+    public function updateUser(User $user): array
+    {
+        $sql = "UPDATE user SET name = :name, surname = :surname, age = :age, updatedAt = :updatedAt
+                WHERE id = :userId";
+
+        $state = $this->currentConnect->prepare($sql);
+
+        $state->bindValue(":name", $user->getName());
+        $state->bindValue(":surname", $user->getsurname());
+        $state->bindValue(":age", $user->getage());
+        $state->bindValue(":updatedAt", $user->getupdatedAt()->format('Y-m-d H:i:s'));
+        $state->bindValue(":userId", $user->getId());
+
+        try {
+            $state->execute();
+        } catch (PDOException $e) {
+            $state->debugDumpParams();
+            return [
+                'body' => $e->getMessage(),
+                'status' => $e->getCode(),
+            ];
+        }
+
+        return [
+            'body' => 'Данные успешно изменены',
+            'status' => 200,
+        ];
+    }
 }

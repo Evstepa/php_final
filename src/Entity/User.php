@@ -180,16 +180,10 @@ final class User
             $this->setAge((int) $userData['age']);
         }
         if (isset($userData['roles'])) {
-            $this->setAge((int) $userData['roles']);
-        }
-        if (isset($userData['folder'])) {
-            $this->setAge((int) $userData['folder']);
-        }
-        if (isset($userData['createdAt'])) {
-            $this->setAge((int) $userData['createdAt']);
+            $this->setRoles($userData['roles']);
         }
         if (isset($userData['updatedAt'])) {
-            $this->setAge((int) $userData['updatedAt']);
+            $this->setUpdatedAt();
         }
         return $this;
     }

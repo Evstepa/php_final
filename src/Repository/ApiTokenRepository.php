@@ -49,4 +49,26 @@ final class ApiTokenRepository extends Db
             'status' => 200,
         ];
     }
+
+    public function logout(array $userData): array
+    {
+        $sql = sprintf("SELECT * FROM token WHERE token = '%s'", $userData['token']);
+        $answer = $this->findOne($sql);
+
+        if (!$answer['body']) {
+            return [
+                'body' => 'Ошибка чтения токена',
+                'status' => $answer['status'],
+            ];
+        }
+
+        $sql = sprintf("DELETE FROM token WHERE token = '%s'", $userData['token']);
+        $state = $this->currentConnect->prepare($sql);
+        $state->execute();
+
+        return [
+            'body' => 'Выход из системы выполнен',
+            'status' => 200,
+        ];
+    }
 }
