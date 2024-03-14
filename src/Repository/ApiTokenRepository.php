@@ -7,6 +7,7 @@ namespace App\Repository;
 use PDO;
 use App\Core\Db;
 use PDOException;
+use App\Entity\User;
 use App\Entity\ApiToken;
 
 final class ApiTokenRepository extends Db
@@ -70,5 +71,32 @@ final class ApiTokenRepository extends Db
             'body' => 'Выход из системы выполнен',
             'status' => 200,
         ];
+    }
+
+    public function deleteToken(User $user): array
+    {
+        $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());
+        $answer = $this->findOne($sql);
+
+        $ans = null;
+
+        if ($answer['body']) {
+            $sql = sprintf("DELETE FROM token WHERE user_id = '%d'", $user->getId());
+            $ans = $this->currentConnect->prepare($sql)->execute();
+        }
+
+        if ($ans) {
+            $answer = [
+                'body' => 'Токен успешно удалён',
+                'status' => 200,
+            ];
+        } else {
+            $answer = [
+                'body' => 'Токен не найден',
+                'status' => 404,
+            ];
+        }
+
+        return $answer;
     }
 }

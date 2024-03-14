@@ -104,4 +104,57 @@ class UserController
             ];
         }
     }
+
+    /**
+     * запрос на сброс пароля
+     * route('/users/reset_password', method='GET')
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function resetPassword(array $userData): array
+    {
+        if (isset($userData['email'])) {
+            return $this->userProvider->resetPassword([
+                'email' => $userData['email'],
+            ]);
+        }
+        if (isset($userData['token'])) {
+            return [
+                'body' => 'Input new password',
+                'status' => 200,
+            ];
+        }
+        return [
+            'body' => ':(',
+            'status' => 404,
+        ];
+    }
+
+    /**
+     * установка нового пароля
+     * route('/users/set_password', method='POST')
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function setNewPassword(array $userData): array
+    {
+        if (
+            isset($userData['token'])
+            && isset($userData['newPassword'])
+            && isset($userData['repeatNewPassword'])
+            && $userData['repeatNewPassword'] == $userData['newPassword']
+        ) {
+            return $this->userProvider->setNewPassword([
+                'token' => $userData['token'],
+                'password' => $userData['newPassword'],
+            ]);
+        }
+
+        return [
+            'body' => ':((',
+            'status' => 404,
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use App\Entity\User;
 use DateTimeInterface;
 use App\Repository\ApiTokenRepository;
@@ -48,7 +49,9 @@ class ApiToken
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
-        $this->expiresAt = new \DateTime('+1 day');
+        // или
+        // $this->apiToken = bin2hex(random_bytes (16));
+        $this->expiresAt = new \DateTime('+1 hour');
     }
 
     public function getExpiresAt(): ?DateTimeInterface
@@ -64,5 +67,13 @@ class ApiToken
     public function isExpired()
     {
         return $this->getExpiresAt() <= new \DateTime();
+    }
+
+    public function fillData(array $tokenData): self
+    {
+        $this->apiToken = $tokenData['token'];
+        $this->expiresAt = new DateTime($tokenData['expiresAt']);
+
+        return $this;
     }
 }

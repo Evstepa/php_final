@@ -37,9 +37,14 @@ const ROUTES = [
         'action' => 'logoutUser',
     ],
     "/users/reset_password" => [
-        'method' => 'PUT',
+        'method' => 'GET',
         'controller' => 'UserController',
-        'action' => 'resetUserPassword',
+        'action' => 'resetPassword',
+    ],
+    "/users/set_password" => [
+        'method' => 'POST',
+        'controller' => 'UserController',
+        'action' => 'setNewPassword',
     ],
     // "/admin/users/list" => [
     //     'method' => 'GET',

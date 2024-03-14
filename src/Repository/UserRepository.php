@@ -24,37 +24,24 @@ final class UserRepository extends Db
      */
     public function create(User $user): array
     {
-        $sql = "INSERT INTO user (id, email, password, name, surname, age, folder, role, createdAt, updatedAt)
-             VALUES (null, :email, :password, :name, :surname, :age, :folder, :role, :createdAt, :updatedAt)";
+        $answer = sqlCreateUpdate([
+            'state' => $this->currentConnect,
+            'query' => 'INSERT',
+            'table' => 'user',
+            'obj' => $user,
+        ]);
 
-        $state = $this->currentConnect->prepare($sql);
-
-        try {
-            $state->execute(
-                [
-                    'email' => $user->getEmail(),
-                    'password' => $user->getPassword(),
-                    'name' => $user->getName(),
-                    'surname' => $user->getSurname(),
-                    'age' => $user->getAge(),
-                    'folder' => $user->getFolder(),
-                    'role' => implode(', ', $user->getRoles()),
-                    'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'updatedAt' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
-                ]
-            );
-        } catch (PDOException $e) {
-            $state->debugDumpParams();
+        if ($answer) {
             return [
-                'body' => $e->getMessage(),
-                'status' => $e->getCode(),
+                'body' => 'Пользователь успешно создан',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Ошибка доступа к БД',
+                'status' => 403,
             ];
         }
-
-        return [
-            'body' => 'Пользователь успешно создан',
-            'status' => 200,
-        ];
     }
 
     /**
@@ -88,32 +75,30 @@ final class UserRepository extends Db
         return $answer;
     }
 
-    public function updateUser(User $user): array
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function updateUser(User $user, array $key): array
     {
-        $sql = "UPDATE user SET name = :name, surname = :surname, age = :age, updatedAt = :updatedAt
-                WHERE id = :userId";
+        $answer = sqlCreateUpdate([
+            'state' => $this->currentConnect,
+            'query' => 'UPDATE',
+            'table' => 'user',
+            'obj' => $user,
+            'key' => $key,
+        ]);
 
-        $state = $this->currentConnect->prepare($sql);
-
-        $state->bindValue(":name", $user->getName());
-        $state->bindValue(":surname", $user->getsurname());
-        $state->bindValue(":age", $user->getage());
-        $state->bindValue(":updatedAt", $user->getupdatedAt()->format('Y-m-d H:i:s'));
-        $state->bindValue(":userId", $user->getId());
-
-        try {
-            $state->execute();
-        } catch (PDOException $e) {
-            $state->debugDumpParams();
+        if ($answer) {
             return [
-                'body' => $e->getMessage(),
-                'status' => $e->getCode(),
+                'body' => 'Данные успешно изменены',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Ошибка доступа к БД',
+                'status' => 403,
             ];
         }
-
-        return [
-            'body' => 'Данные успешно изменены',
-            'status' => 200,
-        ];
     }
 }

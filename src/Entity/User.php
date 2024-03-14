@@ -10,12 +10,12 @@ final class User
 
     private string $email;
 
-    private array $roles = [];
-
     /**
      * @var string The hashed password
      */
     private string $password;
+
+    private array $role = [];
 
     private ?string $name = null;
 
@@ -34,6 +34,7 @@ final class User
     public function __construct()
     {
         $this->createdAt = new DateTime();
+        // $this->updatedAt = new DateTime();
     }
 
     public function setId(int $id): self
@@ -60,15 +61,15 @@ final class User
 
     public function getRoles(): array
     {
-        $roles = $this->roles;
+        $roles = $this->role;
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
+    public function setRoles(string $roles): self
     {
-        $this->roles = $roles;
+        $this->role = (array) $roles;
         return $this;
     }
 
@@ -159,6 +160,12 @@ final class User
         return $this;
     }
 
+    /**
+     * заполнение полей объекта данными
+     *
+     * @param array $userData
+     * @return self
+     */
     public function fillUserData(array $userData): self
     {
         if (isset($userData['id'])) {
@@ -170,7 +177,7 @@ final class User
         if (isset($userData['password'])) {
             $this->setPassword($userData['password']);
         }
-        if ($userData['name']) {
+        if (isset($userData['name'])) {
             $this->setName($userData['name']);
         }
         if (isset($userData['surname'])) {
@@ -179,12 +186,33 @@ final class User
         if (isset($userData['age'])) {
             $this->setAge((int) $userData['age']);
         }
-        if (isset($userData['roles'])) {
-            $this->setRoles($userData['roles']);
+        if (isset($userData['role'])) {
+            $this->setRoles($userData['role']);
         }
-        if (isset($userData['updatedAt'])) {
-            $this->setUpdatedAt();
-        }
+        $this->setUpdatedAt();
+
         return $this;
+    }
+
+    /**
+     * выгрузка данных из полей объекта
+     *
+     * @return array
+     */
+    public function extractData(): array
+    {
+        $userData['id'] = isset($this->id) ? $this->getId() : null;
+        $userData['email'] = isset($this->email) ? $this->getEmail() : null;
+        $userData['password'] = isset($this->password) ? $this->getPassword() : null;
+        $userData['role'] = isset($this->role) ? implode(', ', $this->getRoles()) : null;
+        $userData['name'] = isset($this->name) ? $this->getName() : null;
+        $userData['surname'] = isset($this->surname) ? $this->getSurname() : null;
+        $userData['age'] = isset($this->age) ? $this->getAge() : null;
+        $userData['folder'] = isset($this->folder) ? $this->getFolder() : null;
+        $userData['token'] = isset($this->apiToken) ? $this->getApiToken() : null;
+        $userData['createdAt'] = isset($this->createdAt) ? $this->getCreatedAt()->format('Y-m-d H:i:s') : null;
+        $userData['updatedAt'] = isset($this->updatedAt) ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null;
+
+        return $userData;
     }
 }
