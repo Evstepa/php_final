@@ -66,4 +66,29 @@ const ROUTES = [
         'controller' => 'AdminController',
         'action' => 'updateUser',
     ],
+    "/files/list" => [
+        'method' => 'GET',
+        'controller' => 'FilesController',
+        'action' => 'getFilesList',
+    ],
+    "/files/get/{id}" => [
+        'method' => 'GET',
+        'controller' => 'FilesController',
+        'action' => 'getFile',
+    ],
+    "/files/add" => [
+        'method' => 'POST',
+        'controller' => 'FilesController',
+        'action' => 'addFile',
+    ],
+    "/files/rename" => [
+        'method' => 'PUT',
+        'controller' => 'FilesController',
+        'action' => 'renameFile',
+    ],
+    "/files/remove" => [
+        'method' => 'DELETE',
+        'controller' => 'FilesController',
+        'action' => 'removeFile',
+    ],
 ];
