@@ -24,7 +24,7 @@ final class UserRepository extends Db
      */
     public function create(User $user): array
     {
-        $answer = sqlCreateUpdate([
+        $answer = getSqlCreateUpdate([
             'state' => $this->currentConnect,
             'query' => 'INSERT',
             'table' => 'user',
@@ -49,9 +49,12 @@ final class UserRepository extends Db
      */
     public function findAllGeneralData(): array
     {
-        $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
-        $answer = $this->findAll($sql);
-        return $answer;
+        if (isset($_SESSION['role']) && in_array('ROLE_ADMIN', $_SESSION['role'])) {
+            $sql = sprintf("SELECT * FROM user WHERE 1");
+        } else {
+            $sql = sprintf("SELECT id, name, surname, age FROM user WHERE 1");
+        }
+        return $this->findAll($sql);
     }
 
     /**
@@ -60,9 +63,12 @@ final class UserRepository extends Db
      */
     public function findOneBy(array $criteria): array
     {
-        $sql = sprintf("SELECT id, name, surname, age FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
-        $answer = $this->findOne($sql);
-        return $answer;
+        if (isset($_SESSION['role']) && in_array('ROLE_ADMIN', $_SESSION['role'])) {
+            $sql = sprintf("SELECT * FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
+        } else {
+            $sql = sprintf("SELECT id, name, surname, age FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
+        }
+        return $this->findOne($sql);
     }
 
     /**
@@ -81,7 +87,7 @@ final class UserRepository extends Db
      */
     public function updateUser(User $user, array $key): array
     {
-        $answer = sqlCreateUpdate([
+        $answer = getSqlCreateUpdate([
             'state' => $this->currentConnect,
             'query' => 'UPDATE',
             'table' => 'user',

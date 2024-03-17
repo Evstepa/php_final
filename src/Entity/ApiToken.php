@@ -17,7 +17,7 @@ class ApiToken
 
     private DateTimeInterface $expiresAt;
 
-    private ?User $user = null;
+    private User $user;
 
     public function __construct(User $user)
     {
@@ -66,9 +66,15 @@ class ApiToken
 
     public function isExpired()
     {
-        return $this->getExpiresAt() <= new \DateTime();
+        return $this->getExpiresAt() >= new \DateTime();
     }
 
+    /**
+     * заполнение полей данными
+     *
+     * @param array $tokenData
+     * @return self
+     */
     public function fillData(array $tokenData): self
     {
         $this->apiToken = $tokenData['token'];

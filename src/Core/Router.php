@@ -17,6 +17,12 @@ class Router
     {
     }
 
+    /**
+     * обработка URL
+     *
+     * @param Request $request
+     * @return array
+     */
     private static function parseUrl(Request $request): array
     {
         $parseUrl = parse_url($request->getRoute());
@@ -31,9 +37,16 @@ class Router
         return $parseUrl;
     }
 
+    /**
+     * обработка запроса
+     *
+     * @param Request $request
+     * @return Response
+     */
     public static function processRequest(Request $request): Response
     {
         // var_dump($request);
+        // die();
         $parseUrl = self::parseUrl($request);
         // var_dump($parseUrl);
 
@@ -43,6 +56,7 @@ class Router
             $callback = ROUTES[$parseUrl['path']];
         }
         // var_dump($callback);
+        // die();
 
         // if ($callback['method'] != $method) {
         //     Router::ErrorPage404();
@@ -50,6 +64,7 @@ class Router
         // }
 
         $params = !is_null($request->getData()) ? $request->getData() : [];
+
         if (array_key_exists('query', $parseUrl)) {
             $query = explode('=', $parseUrl['query']);
             $params[$query[0]] = $query[1];
@@ -64,11 +79,11 @@ class Router
 
         $className = App::getService($callback['controller']);
         // var_dump($className);
+        // die();
         $obj = new $className;
 
         $answer = call_user_func([$obj, $callback['action']], $params);
         // var_dump($answer);
-        // die();
 
         return new Response($answer);
     }

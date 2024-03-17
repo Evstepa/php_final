@@ -64,7 +64,6 @@ class Request
             default:
                 break;
         }
-
         $data['token'] = $this->getAuthToken();
         $this->data = $data;
     }

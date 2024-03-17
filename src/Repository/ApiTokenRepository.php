@@ -21,6 +21,10 @@ final class ApiTokenRepository extends Db
         $this->currentConnect = self::getInstance()->getConnection();
     }
 
+    /**
+     * @param ApiToken $apiToken
+     * @return array
+     */
     public function create(ApiToken $apiToken): array
     {
 
@@ -51,6 +55,10 @@ final class ApiTokenRepository extends Db
         ];
     }
 
+    /**
+     * @param array $userData
+     * @return array
+     */
     public function logout(array $userData): array
     {
         $sql = sprintf("SELECT * FROM token WHERE token = '%s'", $userData['token']);
@@ -73,6 +81,10 @@ final class ApiTokenRepository extends Db
         ];
     }
 
+    /**
+     * @param User $user
+     * @return array
+     */
     public function deleteToken(User $user): array
     {
         $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());

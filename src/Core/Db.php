@@ -6,6 +6,7 @@ namespace App\Core;
 
 use PDO;
 use Exception;
+use PDOException;
 
 class Db
 {
@@ -77,6 +78,30 @@ class Db
         return [
             'body' => $answer,
             'status' => $errorCode,
+        ];
+    }
+
+    /**
+     * @param string $sql
+     * @return array
+     */
+    public function deleteUser(string $sql): array
+    {
+        $db = self::getInstance();
+        $state = $db->connect->prepare($sql);
+
+        try {
+            $state->execute();
+        } catch (PDOException $e) {
+            return [
+                'body' => $e->getMessage(),
+                'status' => $e->getCode(),
+            ];
+        }
+
+        return [
+            'body' => 'Пользователь успешно удалён',
+            'status' => 200,
         ];
     }
 }

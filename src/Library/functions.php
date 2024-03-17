@@ -46,7 +46,7 @@ function sendMessageMail(string $to, string $from, string $title, string $messag
  * @param array $data
  * @return boolean
  */
-function sqlCreateUpdate(array $data): bool
+function getSqlCreateUpdate(array $data): bool
 {
     $connect = $data['state'];
     $query = $data['query'];

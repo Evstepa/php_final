@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Core\Response;
 use App\Entity\User;
 use App\Service\UserProvider;
 
@@ -35,7 +34,7 @@ class UserController
      */
     public function getUser(array $userData): array
     {
-        return $this->userProvider->getUser($userData['id']);
+        return $this->userProvider->getUser(['id', $userData['id']]);
     }
 
     /**
@@ -156,5 +155,24 @@ class UserController
             'body' => ':((',
             'status' => 404,
         ];
+    }
+
+    /**
+     * @param string $requestToken
+     * @return boolean
+     */
+    public function verifyUserToken(string $requestToken): bool
+    {
+        $user = new User();
+        $user->fillUserData($this->userProvider->getUser(['id' => $requestToken['user_id']])['body']);
+
+        $sessionToken = isset($_SESSION['currentUser']) ? $_SESSION['currentUser'] : '';
+        $adminToken = $this->userProvider->getToken($requestToken)['body'];
+
+        return (
+            $user->getId() === $adminToken['user_id']
+            && $requestToken === $sessionToken
+            && $this->userProvider->verifyToken($user, $adminToken)
+        );
     }
 }

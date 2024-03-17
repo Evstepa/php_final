@@ -46,9 +46,24 @@ const ROUTES = [
         'controller' => 'UserController',
         'action' => 'setNewPassword',
     ],
-    // "/admin/users/list" => [
-    //     'method' => 'GET',
-    //     'controller' => 'AdminController',
-    //     'action' => 'getUsers List',
-    // ],
+    "/admin/users/list" => [
+        'method' => 'GET',
+        'controller' => 'AdminController',
+        'action' => 'getUsersList',
+    ],
+    "/admin/users/get/{id}" => [
+        'method' => 'GET',
+        'controller' => 'AdminController',
+        'action' => 'getUser',
+    ],
+    "/admin/users/delete/{id}" => [
+        'method' => 'DELETE',
+        'controller' => 'AdminController',
+        'action' => 'deleteUser',
+    ],
+    "/admin/users/update/{id}" => [
+        'method' => 'PUT',
+        'controller' => 'AdminController',
+        'action' => 'updateUser',
+    ],
 ];

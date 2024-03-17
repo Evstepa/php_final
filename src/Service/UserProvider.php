@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\ApiToken;
-use DateTime;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Repository\ApiTokenRepository;
@@ -37,9 +36,9 @@ class UserProvider
      * @param integer $id
      * @return array
      */
-    public function getUser(int $id): array
+    public function getUser(array $criteria): array
     {
-        return $this->userRepository->findOneBy(['id' => $id]);
+        return $this->userRepository->findOneBy($criteria);
     }
 
     /**
@@ -61,9 +60,8 @@ class UserProvider
 
         $user = new User();
         $user->fillUserData($userData);
-        $user->setRoles(['ROLE_USER']);
+        $user->setRoles('ROLE_USER');
         $user->setFolder();
-        $user->setUpdatedAt();
         return $this->userRepository->create($user);
     }
 
@@ -108,7 +106,8 @@ class UserProvider
             ];
         }
 
-        $_SESSION["currentUser"] = $apiToken->getToken();
+        $_SESSION['currentUser'] = $apiToken->getToken();
+        $_SESSION['role'] = $user->getRoles();
 
         return $answer;
     }
@@ -124,8 +123,12 @@ class UserProvider
         $answer = $this->apiTokenRepository->logout($userData);
 
         unset($_SESSION['currentUser']);
+        unset($_SESSION['role']);
 
-        header("Location: index.php");
+        // или
+        // sessin_destroy();
+
+        header('Location: index.php');
 
         return $answer;
     }
@@ -148,10 +151,14 @@ class UserProvider
         }
 
         $user = new User();
-
+        if (isset($userData['id'])) {
+            $user->setId($userData['id']);
+        } else {
+            $user->setId($answer['body']['user_id']);
+        }
         $user->fillUserData($userData);
 
-        $answer = $this->userRepository->updateUser($user, ['id' => $answer['body']['user_id']]);
+        $answer = $this->userRepository->updateUser($user, ['id' => $user->getId()]);
 
         return $answer;
     }
@@ -222,10 +229,7 @@ class UserProvider
         $user->setId($answer['body']['user_id']);
         $user->fillUserData($userData);
 
-        $resetToken = new ApiToken($user);
-        $resetToken->fillData($answer['body']);
-
-        if ($resetToken->isExpired()) {
+        if ($this->verifyToken($user, $answer['body'])) {
             return [
                 'body' => 'Срок действия токена истёк',
                 'status' => 401,
@@ -244,6 +248,16 @@ class UserProvider
     }
 
     /**
+     * @param integer $id
+     * @return array
+     */
+    public function deleteUser(int $id): array
+    {
+        $sql = sprintf("DELETE FROM user WHERE id = %d", $id);
+        return $this->userRepository->deleteUser($sql);
+    }
+
+    /**
      * запрос к таблице token
      *
      * @param string $token
@@ -253,5 +267,18 @@ class UserProvider
     {
         $sql = sprintf("SELECT * FROM token WHERE token = '%s'", $token);
         return $this->apiTokenRepository->findOne($sql);
+    }
+
+    /**
+     * @param User $user
+     * @param array $tokenData
+     * @return boolean
+     */
+    public function verifyToken(User $user, array $tokenData): bool
+    {
+        $resetToken = new ApiToken($user);
+        $resetToken->fillData($tokenData);
+
+        return $resetToken->isExpired();
     }
 }
