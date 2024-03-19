@@ -87,3 +87,23 @@ function getSqlCreateUpdate(array $data): bool
 
     return $answer;
 }
+
+function cleanArray(array $data, string $substr = null): array
+{
+    $data = array_filter($data, function ($item) {
+        return ($item != "." && $item != "..");
+    });
+    if (isset($substr)) {
+        $data = array_map(function ($item) use ($substr) {
+            return str_ireplace($substr, '', $item);
+        }, $data);
+    }
+    $data = array_values($data);
+
+    $data = array_combine(
+        range(1, sizeof($data)),
+        $data
+    );
+
+    return $data;
+}

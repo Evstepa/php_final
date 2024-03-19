@@ -189,6 +189,9 @@ final class User
         if (isset($userData['role'])) {
             $this->setRoles($userData['role']);
         }
+        if (isset($userData['folder'])) {
+            $this->folder = $userData['folder'];
+        }
         $this->setUpdatedAt();
 
         return $this;

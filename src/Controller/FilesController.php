@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Service\UserProvider;
 use App\Service\FilesProvider;
 
 class FilesController
 {
     private FilesProvider $filesProvider;
 
+    // private UserProvider $userProvider;
+
     public function __construct()
     {
         $this->filesProvider = new FilesProvider();
+        // $this->userProvider = new UserProvider();
     }
 
     /**
@@ -22,11 +27,14 @@ class FilesController
      */
     public function getFilesList(array $userData): array
     {
-        var_dump($userData);
-        return [
-            'body' => 'FilesController.php->getFilesList',
-            'status' => 200,
-        ];
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            return $this->filesProvider->getFilesList(['token' => $userData['token']]);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
     }
 
     /**
@@ -34,13 +42,50 @@ class FilesController
      *
      * @return array
      */
-    public function getFile(array $userData): array
+    public function getFileInfo(array $userData): array
     {
-        var_dump($userData);
-        return [
-            'body' => 'FilesController.php->getFile',
-            'status' => 200,
-        ];
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            return $this->filesProvider->getFileInfo($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    /**
+     * route('/files/remove/{id}', method='DELETE')
+     *
+     * @return array
+     */
+    public function removeFile(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            return $this->filesProvider->deleteFile($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    /**
+     * route('/files/rename/{id}', method='PUT')
+     *
+     * @return array
+     */
+    public function renameFile(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            return $this->filesProvider->renameFile($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
     }
 
     /**
@@ -53,20 +98,6 @@ class FilesController
         var_dump($userData);
         return [
             'body' => 'FilesController.php->addFile',
-            'status' => 200,
-        ];
-    }
-
-    /**
-     * route('/files/rename', method='PUT')
-     *
-     * @return array
-     */
-    public function renameFile(array $userData): array
-    {
-        var_dump($userData);
-        return [
-            'body' => 'FilesController.php->renameFile',
             'status' => 200,
         ];
     }

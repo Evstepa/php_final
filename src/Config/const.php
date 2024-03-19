@@ -5,3 +5,5 @@ const DB_LOGIN = 'root';
 const DB_PASSWORD = '';
 const CLOUD_HOST = 'http://phpfinal';
 const MAIL_AUTOR = 'Регистрация на http://cloud-storage.ru <no-reply@cloud.ru>';
+
+const UPLOAD_USER_ROOT = 'uploads';

@@ -74,19 +74,19 @@ const ROUTES = [
     "/files/get/{id}" => [
         'method' => 'GET',
         'controller' => 'FilesController',
-        'action' => 'getFile',
+        'action' => 'getFileInfo',
     ],
     "/files/add" => [
         'method' => 'POST',
         'controller' => 'FilesController',
         'action' => 'addFile',
     ],
-    "/files/rename" => [
+    "/files/rename/{id}" => [
         'method' => 'PUT',
         'controller' => 'FilesController',
         'action' => 'renameFile',
     ],
-    "/files/remove" => [
+    "/files/remove/{id}" => [
         'method' => 'DELETE',
         'controller' => 'FilesController',
         'action' => 'removeFile',

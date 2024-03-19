@@ -149,7 +149,7 @@ class UserProvider
                 'status' => $answer['status'],
             ];
         }
-
+        //добавить проверку срока действия токена
         $user = new User();
         if (isset($userData['id'])) {
             $user->setId($userData['id']);
@@ -279,6 +279,6 @@ class UserProvider
         $resetToken = new ApiToken($user);
         $resetToken->fillData($tokenData);
 
-        return $resetToken->isExpired();
+        return (!$resetToken->isExpired());
     }
 }
