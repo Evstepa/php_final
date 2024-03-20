@@ -95,10 +95,14 @@ class FilesController
      */
     public function addFile(array $userData): array
     {
-        var_dump($userData);
-        return [
-            'body' => 'FilesController.php->addFile',
-            'status' => 200,
-        ];
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->addFile($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
     }
 }

@@ -15,6 +15,8 @@ class FilesProvider
 
     private array $currentUserFileslist = [];
 
+    private array $currentUserFolderslist = [];
+
     public function __construct()
     {
         $this->userProvider = new UserProvider();
@@ -43,6 +45,26 @@ class FilesProvider
                 $this->getFullFileList($currentRoot . "/" . $files[$i], $searchResult);
             }
         }
+    }
+
+    private function getFoldersList(): void
+    {
+        $currentList = $this->currentUserFileslist;
+        foreach ($currentList as $key => $value) {
+            $item = explode('/', $value);
+            $currentList[$key] = implode('/', array_slice($item, 0, -1));
+        }
+        $this->currentUserFolderslist = array_unique($currentList);
+    }
+
+    private function searchFolder(string $folderName): int
+    {
+        foreach ($this->currentUserFolderslist as $key => $value) {
+            if (stripos($value, $folderName)) {
+                return $key;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -167,6 +189,12 @@ class FilesProvider
         ];
     }
 
+    /**
+     * переименование файла
+     *
+     * @param array $userData
+     * @return array
+     */
     public function renameFile(array $userData): array
     {
         $answer = $this->setFileList($userData);
@@ -204,6 +232,46 @@ class FilesProvider
 
         return [
             'body' => 'Файл переименован',
+            'status' => 200,
+        ];
+    }
+
+    /**
+     * загрузка файла
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function addFile(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        $this->getFoldersList();
+        $folderId = $this->searchFolder($userData['folder']);
+        $folderFrom = $userData['file']['tmp_name'];
+        $folderTo = $folderId !== -1 ? $this->currentUserFolderslist[$folderId] : $this->currentUserRoot;
+        $folderTo .= '/' . $userData['file']['name'];
+
+        if (in_array($folderTo, $this->currentUserFileslist)) {
+            return [
+                'body' => ERROR_MESSAGES['409'],
+                'status' => 409,
+            ];
+        }
+
+        if (!move_uploaded_file($folderFrom, $folderTo)) {
+            return [
+                'body' => ERROR_MESSAGES['460'],
+                'status' => 409,
+            ];
+        }
+
+        return [
+            'body' => 'Файл загружен',
             'status' => 200,
         ];
     }
