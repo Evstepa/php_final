@@ -6,6 +6,9 @@ namespace App\Service;
 
 use App\Entity\File;
 use App\Entity\User;
+use DirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
 
 class FilesProvider
 {
@@ -31,6 +34,14 @@ class FilesProvider
      */
     public function getFullFileList(string $currentRoot, array &$searchResult): void
     {
+        // продумать использование!!!
+        // $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->currentUserRoot));
+        // foreach ($iterator as $file) {
+        //     if ($file->isFile()) {
+        //         $this->currentUserFileslist[] = $file;
+        //     }
+        // }
+
         if (!is_dir($currentRoot)) {
             $searchResult[] = $currentRoot;
             return;
@@ -49,14 +60,28 @@ class FilesProvider
 
     private function getFoldersList(): void
     {
-        $currentList = $this->currentUserFileslist;
-        foreach ($currentList as $key => $value) {
-            $item = explode('/', $value);
-            $currentList[$key] = implode('/', array_slice($item, 0, -1));
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->currentUserRoot)
+        );
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                $this->currentUserFolderslist[] = $file->getRealpath();
+            }
         }
-        $this->currentUserFolderslist = array_unique($currentList);
+        $this->currentUserFolderslist = array_unique($this->currentUserFolderslist);
+        foreach ($this->currentUserFolderslist as $key => $value) {
+            if (str_ends_with($value, UPLOAD_USER_ROOT)) {
+                unset($this->currentUserFolderslist[$key]);
+            }
+        }
     }
 
+    /**
+     * поиск папки для загрузки файла
+     *
+     * @param string $folderName
+     * @return integer
+     */
     private function searchFolder(string $folderName): int
     {
         foreach ($this->currentUserFolderslist as $key => $value) {
@@ -249,8 +274,8 @@ class FilesProvider
         if ($answer['status'] != 200) {
             return $answer;
         }
-
         $this->getFoldersList();
+
         $folderId = $this->searchFolder($userData['folder']);
         $folderFrom = $userData['file']['tmp_name'];
         $folderTo = $folderId !== -1 ? $this->currentUserFolderslist[$folderId] : $this->currentUserRoot;
