@@ -58,6 +58,11 @@ class FilesProvider
         }
     }
 
+    /**
+     * полный список всех каталогов с путями
+     *
+     * @return void
+     */
     private function getFoldersList(): void
     {
         $iterator = new RecursiveIteratorIterator(
@@ -74,6 +79,7 @@ class FilesProvider
                 unset($this->currentUserFolderslist[$key]);
             }
         }
+        $this->currentUserFolderslist = array_values($this->currentUserFolderslist);
     }
 
     /**
@@ -117,6 +123,7 @@ class FilesProvider
         $currentUserFileslist = [];
         $this->getFullFileList($this->currentUserRoot, $currentUserFileslist);
         $this->currentUserFileslist = $currentUserFileslist;
+        $this->getFoldersList();
 
         return [
             'body' => 'OK',
@@ -274,7 +281,6 @@ class FilesProvider
         if ($answer['status'] != 200) {
             return $answer;
         }
-        $this->getFoldersList();
 
         $folderId = $this->searchFolder($userData['folder']);
         $folderFrom = $userData['file']['tmp_name'];
@@ -299,5 +305,164 @@ class FilesProvider
             'body' => 'Файл загружен',
             'status' => 200,
         ];
+    }
+
+    /**
+     * информация о папке - список файлов папки
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function getDirInfo(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        $currentDir = $this->currentUserFolderslist[$userData['id']];
+
+        $dirInfo = array_values(array_diff(scandir($currentDir), array('.', '..')));
+
+        return [
+            'body' => $dirInfo,
+            'status' => 200,
+        ];
+    }
+
+    /**
+     * создание папки
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function addDir(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        $newFolderName = '';
+        if (mb_strlen($userData['parentFolder']) === 0) {
+            $userData['parentFolder'] = $this->currentUserRoot;
+            $newFolderName = $userData['parentFolder'] . '/' . $userData['folderName'];
+        } else {
+            $newFolderName = $this->currentUserRoot
+                . '/' . $userData['parentFolder']
+                . '/' . $userData['folderName'];
+        }
+
+        if (file_exists($newFolderName)) {
+            return [
+                'body' => ERROR_MESSAGES['409'],
+                'status' => 409,
+            ];
+        }
+
+        if (mkdir($newFolderName)) {
+            return [
+                'body' => 'Папка создана',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Не удалось создать папку',
+                'status' => 409,
+            ];
+        }
+    }
+
+    /**
+     * переименование папки
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function renameDir(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        $oldFolderName = '';
+        $newFolderName = '';
+
+        if (mb_strlen($userData['parentFolder']) === 0) {
+            $userData['parentFolder'] = $this->currentUserRoot;
+            $oldFolderName = $userData['parentFolder'] . '/' . $userData['oldName'];
+            $newFolderName = $userData['parentFolder'] . '/' . $userData['newName'];
+        } else {
+            $oldFolderName = $this->currentUserRoot
+                . '/' . $userData['parentFolder']
+                . '/' . $userData['oldName'];
+            $newFolderName = $this->currentUserRoot
+                . '/' . $userData['parentFolder']
+                . '/' . $userData['newName'];
+        }
+
+        if (file_exists($newFolderName)) {
+            return [
+                'body' => ERROR_MESSAGES['409'],
+                'status' => 409,
+            ];
+        }
+
+        if (rename($oldFolderName, $newFolderName)) {
+            return [
+                'body' => 'Папка переименована',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Не удалось переименовать папку',
+                'status' => 409,
+            ];
+        }
+    }
+
+    public function deleteDir(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        if ($userData['id'] === 0) {
+            return [
+                'body' => 'Невозможно удалить корневую папку',
+                'status' => 403,
+            ];
+        }
+
+        if (
+            $userData['id'] > count($this->currentUserFolderslist) - 1
+            || (
+                array_key_exists($userData['id'], $this->currentUserFolderslist)
+                && !file_exists($this->currentUserFolderslist[$userData['id']])
+            )
+        ) {
+            return [
+                'body' => ERROR_MESSAGES['404'],
+                'status' => 404,
+            ];
+        }
+
+        if (rmdir($this->currentUserFolderslist[$userData['id']])) {
+            return [
+                'body' => 'Папки удалена',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Не удалось удалить папку',
+                'status' => 409,
+            ];
+        }
     }
 }

@@ -91,4 +91,24 @@ const ROUTES = [
         'controller' => 'FilesController',
         'action' => 'removeFile',
     ],
+    "/directories/get/{id}" => [
+        'method' => 'GET',
+        'controller' => 'FilesController',
+        'action' => 'getDirInfo',
+    ],
+    "/directories/add" => [
+        'method' => 'POST',
+        'controller' => 'FilesController',
+        'action' => 'addDir',
+    ],
+    "/directories/rename" => [
+        'method' => 'PUT',
+        'controller' => 'FilesController',
+        'action' => 'renameDir',
+    ],
+    "/directories/remove/{id}" => [
+        'method' => 'DELETE',
+        'controller' => 'FilesController',
+        'action' => 'removeDir',
+    ],
 ];

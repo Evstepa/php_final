@@ -105,4 +105,74 @@ class FilesController
             ];
         }
     }
+
+    /**
+     * информация о папке
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function getDirInfo(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->getDirInfo($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    /**
+     * создание папки
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function addDir(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->addDir($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    /**
+     * переименование папки
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function renameDir(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->renameDir($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    public function removeDir(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->deleteDir($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
 }
