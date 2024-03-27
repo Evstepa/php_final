@@ -81,7 +81,7 @@ const ROUTES = [
         'controller' => 'FilesController',
         'action' => 'addFile',
     ],
-    "/files/rename/{id}" => [
+    "/files/rename" => [
         'method' => 'PUT',
         'controller' => 'FilesController',
         'action' => 'renameFile',

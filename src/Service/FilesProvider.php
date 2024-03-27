@@ -26,39 +26,6 @@ class FilesProvider
     }
 
     /**
-     * полный список всех файлов с путями
-     *
-     * @param string $currentRoot
-     * @param array $searchResult
-     * @return void
-     */
-    public function getFullFileList(string $currentRoot, array &$searchResult): void
-    {
-        // продумать использование!!!
-        // $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->currentUserRoot));
-        // foreach ($iterator as $file) {
-        //     if ($file->isFile()) {
-        //         $this->currentUserFileslist[] = $file;
-        //     }
-        // }
-
-        if (!is_dir($currentRoot)) {
-            $searchResult[] = $currentRoot;
-            return;
-        }
-
-        $files = scandir($currentRoot);
-        for ($i = 0; $i < count($files); $i++) {
-            if (
-                is_dir($currentRoot)
-                && !(strrpos($currentRoot, '/.') || strrpos($currentRoot, '/..'))
-            ) {
-                $this->getFullFileList($currentRoot . "/" . $files[$i], $searchResult);
-            }
-        }
-    }
-
-    /**
      * полный список всех каталогов с путями
      *
      * @return void
@@ -99,6 +66,25 @@ class FilesProvider
     }
 
     /**
+     * полный список всех файлов с путями
+     *
+     * @param string $currentRoot
+     * @param array $searchResult
+     * @return void
+     */
+    public function getFullFileList(): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->currentUserRoot)
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $this->currentUserFileslist[] = $file;
+            }
+        }
+    }
+
+    /**
      * верификация пользователя и установка значений полей $currentUserRoot и $currentUserFileslist
      *
      * @param array $userData
@@ -118,11 +104,11 @@ class FilesProvider
             ];
         };
 
-        $this->currentUserRoot = $_SERVER['DOCUMENT_ROOT'] . '/' . UPLOAD_USER_ROOT . '/' . $user->getFolder();
+        $this->currentUserRoot = $_SERVER['DOCUMENT_ROOT']
+            . '/' . UPLOAD_USER_ROOT
+            . '/' . $user->getFolder();
 
-        $currentUserFileslist = [];
-        $this->getFullFileList($this->currentUserRoot, $currentUserFileslist);
-        $this->currentUserFileslist = $currentUserFileslist;
+        $this->getFullFileList();
         $this->getFoldersList();
 
         return [
@@ -146,8 +132,11 @@ class FilesProvider
         }
 
         $currentUserFileslist = [];
+        foreach ($this->currentUserFileslist as $key => $value) {
+            $currentUserFileslist[] = str_replace('\\', '/', $value->getPathName());
+        }
         $currentUserFileslist = cleanArray(
-            $this->currentUserFileslist,
+            $currentUserFileslist,
             $this->currentUserRoot . '/'
         );
 
@@ -180,7 +169,11 @@ class FilesProvider
 
         $currentFile = new File([
             'id' => $userData['id'],
-            'path' => $this->currentUserFileslist[$userData['id'] - 1],
+            'path' => str_replace(
+                '\\',
+                '/',
+                $this->currentUserFileslist[$userData['id'] - 1]->getPathName()
+            ),
         ]);
 
         return [
@@ -205,7 +198,7 @@ class FilesProvider
 
         if (
             $userData['id'] > count($this->currentUserFileslist)
-            || !file_exists($this->currentUserFileslist[$userData['id'] - 1])
+            || !file_exists($this->currentUserFileslist[$userData['id'] - 1]->getPathName())
         ) {
             return [
                 'body' => ERROR_MESSAGES['404'],
@@ -213,12 +206,17 @@ class FilesProvider
             ];
         }
 
-        unlink($this->currentUserFileslist[$userData['id'] - 1]);
-
-        return [
-            'body' => 'Файл удалён',
-            'status' => 200,
-        ];
+        if (unlink($this->currentUserFileslist[$userData['id'] - 1]->getPathName())) {
+            return [
+                'body' => 'Файл удалён',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Файл не может быть удалён',
+                'status' => 409,
+            ];
+        }
     }
 
     /**
@@ -235,37 +233,53 @@ class FilesProvider
             return $answer;
         }
 
-        if (
-            $userData['id'] > count($this->currentUserFileslist)
-            || !file_exists($this->currentUserFileslist[$userData['id'] - 1])
-        ) {
+        if (mb_strlen(trim($userData['parentFolder'])) === 0) {
+            $userData['parentFolder'] = $this->currentUserRoot;
+        }
+
+        $oldFileName = '';
+        $newFileName = '';
+        for ($i = 0; $i < count($this->currentUserFileslist); $i++) {
+            if (
+                $this->currentUserFileslist[$i]->getFileName() === $userData['oldName']
+                &&
+                str_ends_with(
+                    $this->currentUserFileslist[$i]->getPath(),
+                    $userData['parentFolder']
+                )
+            ) {
+                $oldFileName = $this->currentUserFileslist[$i]->getPathName();
+                $newFileName = $this->currentUserFileslist[$i]->getPath();
+                break;
+            }
+        }
+        $newFileName .= '/' . $userData['newName'];
+
+        if ($oldFileName === '') {
             return [
                 'body' => ERROR_MESSAGES['404'],
                 'status' => 404,
             ];
         }
 
-        $currentFile = new File([
-            'id' => $userData['id'],
-            'path' => $this->currentUserFileslist[$userData['id'] - 1],
-        ]);
-
-        $newName = $this->currentUserRoot . $currentFile->getFolder() . '/' . $userData['name'];
-        if (file_exists($newName)) {
+        if (file_exists($newFileName)) {
             return [
                 'body' => ERROR_MESSAGES['409'],
                 'status' => 409,
             ];
         }
-        rename(
-            $this->currentUserFileslist[$userData['id'] - 1],
-            $newName
-        );
 
-        return [
-            'body' => 'Файл переименован',
-            'status' => 200,
-        ];
+        if (rename($oldFileName, $newFileName)) {
+            return [
+                'body' => 'Файл переименован',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Файл не может быть переименован',
+                'status' => 409,
+            ];
+        }
     }
 
     /**
@@ -284,10 +298,11 @@ class FilesProvider
 
         $folderId = $this->searchFolder($userData['folder']);
         $folderFrom = $userData['file']['tmp_name'];
+
         $folderTo = $folderId !== -1 ? $this->currentUserFolderslist[$folderId] : $this->currentUserRoot;
         $folderTo .= '/' . $userData['file']['name'];
 
-        if (in_array($folderTo, $this->currentUserFileslist)) {
+        if (file_exists($folderTo)) {
             return [
                 'body' => ERROR_MESSAGES['409'],
                 'status' => 409,
@@ -425,6 +440,12 @@ class FilesProvider
         }
     }
 
+    /**
+     * удаление папки
+     *
+     * @param array $userData
+     * @return array
+     */
     public function deleteDir(array $userData): array
     {
         $answer = $this->setFileList($userData);

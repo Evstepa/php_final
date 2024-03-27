@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Service\UserProvider;
 use App\Service\FilesProvider;
 
 class FilesController
 {
     private FilesProvider $filesProvider;
 
-    // private UserProvider $userProvider;
-
     public function __construct()
     {
         $this->filesProvider = new FilesProvider();
-        // $this->userProvider = new UserProvider();
     }
 
     /**
@@ -163,6 +158,12 @@ class FilesController
         }
     }
 
+    /**
+     * удаление папки
+     *
+     * @param array $userData
+     * @return array
+     */
     public function removeDir(array $userData): array
     {
         if ($_SESSION['currentUser'] === $userData['token']) {
