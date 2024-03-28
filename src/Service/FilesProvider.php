@@ -6,13 +6,15 @@ namespace App\Service;
 
 use App\Entity\File;
 use App\Entity\User;
-use DirectoryIterator;
+use App\Repository\FileRepository;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
 class FilesProvider
 {
     private UserProvider $userProvider;
+
+    private FileRepository $fileRepository;
 
     private string $currentUserRoot = '';
 
@@ -23,6 +25,7 @@ class FilesProvider
     public function __construct()
     {
         $this->userProvider = new UserProvider();
+        $this->fileRepository = new FileRepository();
     }
 
     /**
@@ -68,20 +71,42 @@ class FilesProvider
     /**
      * полный список всех файлов с путями
      *
-     * @param string $currentRoot
-     * @param array $searchResult
+     * @param int $userId
      * @return void
      */
-    public function getFullFileList(): void
+    public function getFullFileList(int $userId): void
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->currentUserRoot)
+        // $iterator = new RecursiveIteratorIterator(
+        //     new RecursiveDirectoryIterator($this->currentUserRoot)
+        // );
+        // foreach ($iterator as $file) {
+        //     if ($file->isFile()) {
+        //         $this->currentUserFileslist[] = $file;
+        //     }
+        // }
+
+        $sql = sprintf(
+            "SELECT `file`.`id`, `file`.`full_path`
+            FROM `access`
+            JOIN `file` ON `file`.`id`= `access`.`file_id`
+            WHERE user_id = %d",
+            $userId
         );
-        foreach ($iterator as $file) {
-            if ($file->isFile()) {
-                $this->currentUserFileslist[] = $file;
-            }
+
+        $answer = $this->fileRepository->findAll($sql);
+        if ($answer['status'] !== 200) {
+            $this->currentUserFileslist = [];
         }
+
+        $currentUserFileslist = [];
+        foreach ($answer['body'] as $key => $value) {
+            $currentUserFileslist[] = new File([
+                'id' => $value['id'],
+                'path' => $_SERVER['DOCUMENT_ROOT'] . '/' . UPLOAD_USER_ROOT
+                    . $value['full_path'],
+            ]);
+        }
+        $this->currentUserFileslist = $currentUserFileslist;
     }
 
     /**
@@ -108,11 +133,13 @@ class FilesProvider
             . '/' . UPLOAD_USER_ROOT
             . '/' . $user->getFolder();
 
-        $this->getFullFileList();
+        $this->getFullFileList($user->getId());
         $this->getFoldersList();
 
         return [
-            'body' => 'OK',
+            'body' => [
+                'userID' => $user->getId(),
+            ],
             'status' => 200,
         ];
     }
@@ -131,17 +158,17 @@ class FilesProvider
             return $answer;
         }
 
-        $currentUserFileslist = [];
+        $currentFileList = [];
         foreach ($this->currentUserFileslist as $key => $value) {
-            $currentUserFileslist[] = str_replace('\\', '/', $value->getPathName());
+            if ($value->getFolder() !== '/') {
+                $currentFileList[] = $value->getFolder() . '/' . $value->getName();
+            } else {
+                $currentFileList[] = $value->getFolder() . $value->getName();
+            }
         }
-        $currentUserFileslist = cleanArray(
-            $currentUserFileslist,
-            $this->currentUserRoot . '/'
-        );
 
         return [
-            'body' => $currentUserFileslist,
+            'body' => $currentFileList,
             'status' => 200,
         ];
     }
@@ -167,14 +194,7 @@ class FilesProvider
             ];
         }
 
-        $currentFile = new File([
-            'id' => $userData['id'],
-            'path' => str_replace(
-                '\\',
-                '/',
-                $this->currentUserFileslist[$userData['id'] - 1]->getPathName()
-            ),
-        ]);
+        $currentFile = $this->currentUserFileslist[$userData['id'] - 1];
 
         return [
             'body' => $currentFile->exportData(),
@@ -234,22 +254,25 @@ class FilesProvider
         }
 
         if (mb_strlen(trim($userData['parentFolder'])) === 0) {
-            $userData['parentFolder'] = $this->currentUserRoot;
+            $userData['parentFolder'] = '/';
         }
 
         $oldFileName = '';
         $newFileName = '';
+        $fileId = null;
+
         for ($i = 0; $i < count($this->currentUserFileslist); $i++) {
             if (
-                $this->currentUserFileslist[$i]->getFileName() === $userData['oldName']
+                $this->currentUserFileslist[$i]->getName() === $userData['oldName']
                 &&
                 str_ends_with(
-                    $this->currentUserFileslist[$i]->getPath(),
+                    $this->currentUserFileslist[$i]->getFolder(),
                     $userData['parentFolder']
                 )
             ) {
-                $oldFileName = $this->currentUserFileslist[$i]->getPathName();
-                $newFileName = $this->currentUserFileslist[$i]->getPath();
+                $fileId = $i;
+                $oldFileName = $this->currentUserFileslist[$i]->getPath();
+                $newFileName = $this->currentUserFileslist[$i]->getShortPath();
                 break;
             }
         }
@@ -270,6 +293,10 @@ class FilesProvider
         }
 
         if (rename($oldFileName, $newFileName)) {
+            $this->fileRepository->rename(
+                $this->currentUserFileslist[$fileId],
+                implode('/', array_slice(explode('/', $newFileName), 5))
+            );
             return [
                 'body' => 'Файл переименован',
                 'status' => 200,

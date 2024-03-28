@@ -18,8 +18,6 @@ final class File
 
     private string $folder = '/';
 
-    // private DateTime $createdAt;
-
     private DateTime $lastAccessAt;
 
     public function __construct(array $pathData)
@@ -47,6 +45,16 @@ final class File
     {
         return implode('/', $this->path);
     }
+
+    public function getShortPath(): string
+    {
+        return implode('/', array_slice($this->path, 0, -1));
+    }
+
+    // public function getPathDb(): string
+    // {
+    //     return implode('/', array_slice($this->path, 0, -1));
+    // }
 
     public function setOwners(string $owners): self
     {
@@ -124,7 +132,7 @@ final class File
     public function exportData(): array
     {
         return [
-            'id' => $this->getId(),
+            // 'id' => $this->getId(),
             'name' => $this->getName(),
             'size' => $this->getSize(),
             'folder' => $this->getFolder(),

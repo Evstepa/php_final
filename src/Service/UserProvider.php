@@ -254,7 +254,7 @@ class UserProvider
     public function deleteUser(int $id): array
     {
         $sql = sprintf("DELETE FROM user WHERE id = %d", $id);
-        return $this->userRepository->deleteUser($sql);
+        return $this->userRepository->delete($sql);
     }
 
     /**

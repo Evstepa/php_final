@@ -85,7 +85,7 @@ class Db
      * @param string $sql
      * @return array
      */
-    public function deleteUser(string $sql): array
+    public function delete(string $sql): array
     {
         $db = self::getInstance();
         $state = $db->connect->prepare($sql);
@@ -100,7 +100,7 @@ class Db
         }
 
         return [
-            'body' => 'Пользователь успешно удалён',
+            'body' => 'Объект успешно удалён',
             'status' => 200,
         ];
     }
