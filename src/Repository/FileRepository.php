@@ -43,60 +43,47 @@ final class FileRepository extends Db
         }
     }
 
-    // public function create(File $file): array
-    // {
+    /**
+     * загрузка файла
+     *
+     * @param array $fileData
+     * @return array
+     */
+    public function addFile(array $fileData): array
+    {
+        $answer = null;
+        try {
+            $state = $this->currentConnect->beginTransaction();
 
-    //     // $sql = "INSERT INTO file (id, full_path, owner) VALUES (null, :user_id, :token, :expiresdAt)";
-    //     // $state = $this->currentConnect->prepare($sql);
+            $sql = sprintf("INSERT INTO `file`(`id`, `full_path`) VALUES (null, '%s')", $fileData['fullPath']);
+            $state = $this->currentConnect->prepare($sql);
+            $answer = $state->execute();
+            $fileId = 0;
+            if (!$answer) {
+                throw new PDOException("Ошибка боступа к БД");
+            }
+            $fileId = $this->currentConnect->lastInsertId();
+            $sql = sprintf("INSERT INTO `access`(`id`, `user_id`, `file_id`) VALUES (null, '%s', '%s')", $fileData['userId'], $fileId);
+            $state = $this->currentConnect->prepare($sql);
+            $answer = $state->execute();
+        } catch (PDOException $e) {
+            $this->currentConnect->rollBack();
+            return [
+                'body' => $e->getMessage(),
+                'status' => 409,
+            ];
+        }
+        $answer = $this->currentConnect->commit();
 
-    //     // try {
-    //     //     $state->execute(
-    //     //         [
-    //     //             'user_id' => $apiToken->getUser()->getId(),
-    //     //             'token' => $apiToken->getToken(),
-    //     //             'expiresdAt' => $apiToken->getExpiresAt()->format('Y-m-d H:i:s'),
-    //     //         ]
-    //     //     );
-    //     // } catch (PDOException $e) {
-    //     //     $state->debugDumpParams();
-    //     //     return [
-    //     //         'body' => $e->getMessage(),
-    //     //         'status' => $e->getCode(),
-    //     //     ];
-    //     // }
+        return [
+            'body' => 'Файл загружен',
+            'status' => 200,
+        ];
+    }
 
-    //     // return [
-    //     //     'body' => [
-    //     //         'token' => $apiToken->getToken(),
-    //     //     ],
-    //     //     'status' => 200,
-    //     // ];
-    // }
-
-    // public function delete(File $file): array
-    // {
-    //     // $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());
-    //     // $answer = $this->findOne($sql);
-
-    //     // $ans = null;
-
-    //     // if ($answer['body']) {
-    //     //     $sql = sprintf("DELETE FROM token WHERE user_id = '%d'", $user->getId());
-    //     //     $ans = $this->currentConnect->prepare($sql)->execute();
-    //     // }
-
-    //     // if ($ans) {
-    //     //     $answer = [
-    //     //         'body' => 'Токен успешно удалён',
-    //     //         'status' => 200,
-    //     //     ];
-    //     // } else {
-    //     //     $answer = [
-    //     //         'body' => 'Токен не найден',
-    //     //         'status' => 404,
-    //     //     ];
-    //     // }
-
-    //     // return $answer;
-    // }
+    public function remove(File $file): array
+    {
+        $sql = sprintf("DELETE FROM `file` WHERE id = '%d'", $file->getId());
+        return $this->delete($sql);
+    }
 }

@@ -138,7 +138,7 @@ class FilesProvider
 
         return [
             'body' => [
-                'userID' => $user->getId(),
+                'userId' => $user->getId(),
             ],
             'status' => 200,
         ];
@@ -218,7 +218,7 @@ class FilesProvider
 
         if (
             $userData['id'] > count($this->currentUserFileslist)
-            || !file_exists($this->currentUserFileslist[$userData['id'] - 1]->getPathName())
+            || !file_exists($this->currentUserFileslist[$userData['id'] - 1]->getPath())
         ) {
             return [
                 'body' => ERROR_MESSAGES['404'],
@@ -226,7 +226,8 @@ class FilesProvider
             ];
         }
 
-        if (unlink($this->currentUserFileslist[$userData['id'] - 1]->getPathName())) {
+        if (unlink($this->currentUserFileslist[$userData['id'] - 1]->getPath())) {
+            $this->fileRepository->remove($this->currentUserFileslist[$userData['id'] - 1]);
             return [
                 'body' => 'Файл удалён',
                 'status' => 200,
@@ -324,10 +325,19 @@ class FilesProvider
         }
 
         $folderId = $this->searchFolder($userData['folder']);
+        if ($folderId === -1) {
+            return [
+                'body' => 'Указанная папка не существует',
+                'status' => 404,
+            ];
+        }
+
         $folderFrom = $userData['file']['tmp_name'];
 
         $folderTo = $folderId !== -1 ? $this->currentUserFolderslist[$folderId] : $this->currentUserRoot;
-        $folderTo .= '/' . $userData['file']['name'];
+        $folderTo .= '\\' . $userData['file']['name'];
+        $shotFolderTo = '\\' . implode('\\', array_slice(explode('\\', $folderTo), 5));
+        $shotFolderTo = str_replace('\\', '/', $shotFolderTo);
 
         if (file_exists($folderTo)) {
             return [
@@ -336,17 +346,27 @@ class FilesProvider
             ];
         }
 
-        if (!move_uploaded_file($folderFrom, $folderTo)) {
+        if (move_uploaded_file($folderFrom, $folderTo)) {
+            $answer = $this->fileRepository->addFile([
+                'userId' => $answer['body']['userId'],
+                'fullPath' => $shotFolderTo,
+            ]);
+            if ($answer['status'] !== 200) {
+                return [
+                    'body' => 'Ошибка доступа к БД',
+                    'status' => 409,
+                ];
+            }
+            return [
+                'body' => 'Файл загружен',
+                'status' => 200,
+            ];
+        } else {
             return [
                 'body' => ERROR_MESSAGES['460'],
                 'status' => 409,
             ];
         }
-
-        return [
-            'body' => 'Файл загружен',
-            'status' => 200,
-        ];
     }
 
     /**
