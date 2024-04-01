@@ -86,4 +86,76 @@ final class FileRepository extends Db
         $sql = sprintf("DELETE FROM `file` WHERE id = '%d'", $file->getId());
         return $this->delete($sql);
     }
+
+    /**
+     * список пользователей, имеющих доступ к файлу
+     *
+     * @param integer $fileId
+     * @return array
+     */
+    public function shareUserList(int $fileId): array
+    {
+        $sql = sprintf(
+            "SELECT `user`.`id`, `user`.`email`, `user`.`name`, `user`.`surname`
+            FROM `access`
+            JOIN `user` ON `user`.`id`= `access`.`user_id`
+            WHERE `file_id` = %d",
+            $fileId
+        );
+
+        return $this->findAll($sql);
+    }
+
+    /**
+     * предоставление доступа к файлу
+     *
+     * @param array $fileData
+     * @return array
+     */
+    public function shareFileUser(array $fileData): array
+    {
+        $sql = sprintf(
+            "INSERT INTO `access`(`id`, `user_id`, `file_id`)
+            VALUES (null, '%s', '%s')",
+            $fileData['userId'],
+            $fileData['fileId']
+        );
+        $state = $this->currentConnect->prepare($sql);
+        $answer = $state->execute();
+
+        if ($answer) {
+            return [
+                'body' => 'Доступ к файлу открыт',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Ошибка доступа к БД',
+                'status' => 409,
+            ];
+        }
+    }
+
+    public function unshareFileUser(array $fileData): array
+    {
+        $sql = sprintf(
+            "DELETE FROM `access`
+            WHERE `user_id` = '%d' AND `file_id` = '%d'",
+            $fileData['userId'],
+            $fileData['fileId']
+        );
+        $answer = $this->delete($sql);
+
+        if ($answer) {
+            return [
+                'body' => 'Доступ к файлу отменён',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Ошибка доступа к БД',
+                'status' => 409,
+            ];
+        }
+    }
 }

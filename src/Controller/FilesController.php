@@ -176,4 +176,49 @@ class FilesController
             ];
         }
     }
+
+    /**
+     * список пользователей, имеющих доступ к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function getShareUserList(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->getShareUserList($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    public function addShareFileUser(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->addShareFileUser($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    public function deleteShareFileUser(array $userData): array
+    {
+        if ($_SESSION['currentUser'] === $userData['token']) {
+            $userData = array_merge($userData, $_FILES);
+            return $this->filesProvider->unshareFileUser($userData);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
 }

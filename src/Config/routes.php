@@ -46,6 +46,11 @@ const ROUTES = [
         'controller' => 'UserController',
         'action' => 'setNewPassword',
     ],
+    "/users/search/{email}" => [
+        'method' => 'GET',
+        'controller' => 'UserController',
+        'action' => 'searchUserByEmail',
+    ],
     "/admin/users/list" => [
         'method' => 'GET',
         'controller' => 'AdminController',
@@ -90,6 +95,21 @@ const ROUTES = [
         'method' => 'DELETE',
         'controller' => 'FilesController',
         'action' => 'removeFile',
+    ],
+    "/files/share/{id}" => [
+        'method' => 'GET',
+        'controller' => 'FilesController',
+        'action' => 'getShareUserList',
+    ],
+    "/files/share/{id}/{user_id}" => [
+        'method' => 'PUT',
+        'controller' => 'FilesController',
+        'action' => 'addShareFileUser',
+    ],
+    "/files/unshare/{id}/{user_id}" => [
+        'method' => 'DELETE',
+        'controller' => 'FilesController',
+        'action' => 'deleteShareFileUser',
     ],
     "/directories/get/{id}" => [
         'method' => 'GET',

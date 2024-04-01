@@ -109,9 +109,9 @@ final class File
     public function setLastAccessAt(): self
     {
         if (!fileatime($this->getPath())) {
-            $this->lastAccessAt = new \DateTime();
+            $this->lastAccessAt = new DateTime();
         } else {
-            $this->lastAccessAt = new \DateTime(
+            $this->lastAccessAt = new DateTime(
                 date("F-d-Y H:i:s", fileatime($this->getPath()))
             );
         }

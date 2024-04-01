@@ -533,4 +533,129 @@ class FilesProvider
             ];
         }
     }
+
+    /**
+     * список пользователей, имеющих доступ к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function getShareUserList(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        if (!array_key_exists($userData['id'], $this->currentUserFileslist)) {
+            return [
+                'body' => ERROR_MESSAGES['404'],
+                'status' => 404,
+            ];
+        }
+
+        $answer = $this->fileRepository->shareUserList($userData['id']);
+        return [
+            'body' => $answer,
+            'status' => 200,
+        ];
+    }
+
+    /**
+     * предоставление доступа к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function addShareFileUser(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        if ($answer['body']['userId'] === $userData['user_id']) {
+            return [
+                'body' => ERROR_MESSAGES['409'],
+                'status' => 409,
+            ];
+        }
+
+        $sqlUser = sprintf(
+            "SELECT `email` FROM `user` WHERE `id` = %d",
+            $userData['user_id']
+        );
+        $sqlFile = sprintf(
+            "SELECT `full_path` FROM `file` WHERE `id` = %d",
+            $userData['id']
+        );
+
+        if (
+            !$this->fileRepository->findOne($sqlUser)
+            || !$this->fileRepository->findOne($sqlFile)
+        ) {
+            return [
+                'body' => ERROR_MESSAGES['404'],
+                'status' => 404,
+            ];
+        }
+
+        if ($this->findUserFileAccess($userData)) {
+            return [
+                'body' => 'Доступ уже предоставлен',
+                'status' => 409,
+            ];
+        }
+
+        return $this->fileRepository->shareFileUser([
+            'fileId' => $userData['id'],
+            'userId' => $userData['user_id'],
+        ]);
+    }
+
+    /**
+     * прекращение доступа к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function unShareFileUser(array $userData): array
+    {
+        $answer = $this->setFileList($userData);
+
+        if ($answer['status'] != 200) {
+            return $answer;
+        }
+
+        if (!$this->findUserFileAccess($userData)) {
+            return [
+                'body' => ERROR_MESSAGES['404'],
+                'status' => 404,
+            ];
+        }
+
+        return $this->fileRepository->unshareFileUser([
+            'fileId' => $userData['id'],
+            'userId' => $userData['user_id'],
+        ]);
+    }
+
+    private function findUserFileAccess(array $userData): bool
+    {
+        $sql = sprintf(
+            "SELECT `id` FROM `access`
+            WHERE `user_id` = '%d' AND `file_id` = '%d'",
+            $userData['user_id'],
+            $userData['id'],
+        );
+
+        $answer = $this->fileRepository->findOne($sql);
+        if (!$answer['body']) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

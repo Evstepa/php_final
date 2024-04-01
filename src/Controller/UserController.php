@@ -105,6 +105,27 @@ class UserController
     }
 
     /**
+     * поиск пользователя по email
+     *
+     * @param array $userData
+     * @return array
+     */
+    public function searchUserByEmail(array $userData): array
+    {
+        if (
+            isset($_SESSION['currentUser']) && isset($userData['token'])
+            && $_SESSION['currentUser'] === $userData['token']
+        ) {
+            return $this->userProvider->getUser(['email' => $userData['email']]);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
+    }
+
+    /**
      * запрос на сброс пароля
      * route('/users/reset_password', method='GET')
      *

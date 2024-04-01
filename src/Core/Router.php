@@ -26,14 +26,35 @@ class Router
     private static function parseUrl(Request $request): array
     {
         $parseUrl = parse_url($request->getRoute());
-        $url = $parseUrl['path'];
+        // var_dump($parseUrl);
 
-        if (ctype_digit(substr($url, strripos($url, '/') + 1))) {
+        $url = explode('/', $parseUrl['path']);
+
+        if (ctype_digit($url[count($url) - 1]) && ctype_digit($url[count($url) - 2])) {
             $parseUrl = [
-                'query' => 'id=' . substr($url, strripos($url, '/', -1) + 1),
+                'query' => 'id=' . $url[count($url) - 2] . '&user_id=' . $url[count($url) - 1],
             ];
-            $parseUrl['path'] = substr($url, 0, strripos($url, '/', -1) + 1) . '{id}';
+            $parseUrl['path'] = implode('/', array_slice($url, 0, count($url) - 2)) . '/{id}/{user_id}';
+            return $parseUrl;
         }
+
+        if (ctype_digit($url[count($url) - 1])) {
+            $parseUrl = [
+                'query' => 'id=' . $url[count($url) - 1],
+            ];
+            $parseUrl['path'] = implode('/', array_slice($url, 0, count($url) - 1)) . '/{id}';
+            return $parseUrl;
+        }
+
+        if (filter_var($url[count($url) - 1], FILTER_VALIDATE_EMAIL)) {
+            $parseUrl = [
+                'query' =>  'email=' . $url[count($url) - 1],
+            ];
+            $parseUrl['path'] = implode('/', array_slice($url, 0, count($url) - 1)) . '/{email}';
+            return $parseUrl;
+        }
+        // var_dump($parseUrl);
+        // die();
         return $parseUrl;
     }
 
@@ -66,8 +87,13 @@ class Router
         $params = !is_null($request->getData()) ? $request->getData() : [];
 
         if (array_key_exists('query', $parseUrl)) {
-            $query = explode('=', $parseUrl['query']);
-            $params[$query[0]] = $query[1];
+            $exploded = explode('&', $parseUrl['query']);
+            foreach ($exploded as $pair) {
+                $item = explode('=', $pair);
+                if (count($item) == 2) {
+                    $params[urldecode($item[0])] = urldecode($item[1]);
+                }
+            }
             foreach ($params as $key => $value) {
                 if (ctype_digit($value)) {
                     $params[$key] = (int) $value;
