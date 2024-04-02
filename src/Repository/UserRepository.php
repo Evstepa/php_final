@@ -31,6 +31,7 @@ final class UserRepository extends Db
             'obj' => $user,
         ]);
 
+
         if ($answer) {
             return [
                 'body' => 'Пользователь успешно создан',
@@ -66,7 +67,7 @@ final class UserRepository extends Db
         if (isset($_SESSION['role']) && in_array('ROLE_ADMIN', $_SESSION['role'])) {
             $sql = sprintf("SELECT * FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
         } else {
-            $sql = sprintf("SELECT id, name, surname, age FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
+            $sql = sprintf("SELECT id, name, surname, age, folder FROM user WHERE %s = '%s'", array_keys($criteria)[0], array_values($criteria)[0]);
         }
         return $this->findOne($sql);
     }

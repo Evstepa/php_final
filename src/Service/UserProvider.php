@@ -62,7 +62,29 @@ class UserProvider
         $user->fillUserData($userData);
         $user->setRoles('ROLE_USER');
         $user->setFolder();
-        return $this->userRepository->create($user);
+
+        $answer = $this->userRepository->create($user);
+
+        if ($answer['status'] !== 200) {
+            return [
+                'body' => 'Ошибка доступа к БД',
+                'status' => 409,
+            ];
+        }
+
+        $parentFolder = $_SERVER['DOCUMENT_ROOT'] . '/' . UPLOAD_USER_ROOT;
+        $userFolderName = $parentFolder . '/' . $user->getFolder();
+        if (mkdir($userFolderName)) {
+            return [
+                'body' => 'Пользователь успешно рагеристриован. Папка создана',
+                'status' => 200,
+            ];
+        } else {
+            return [
+                'body' => 'Не удалось создать папку',
+                'status' => 409,
+            ];
+        }
     }
 
     /**
@@ -83,7 +105,8 @@ class UserProvider
             ];
         }
 
-        if ($answer['body']['password'] != $userData['password']) {
+        if (!($answer['body']
+            && password_verify($userData['password'], $answer['body']['password']))) {
             return [
                 'body' => ERROR_MESSAGES['401'],
                 'status' => 401,
@@ -248,11 +271,32 @@ class UserProvider
     }
 
     /**
+     * удаление файла
      * @param integer $id
      * @return array
      */
     public function deleteUser(int $id): array
     {
+        $sql = sprintf("SELECT `folder` FROM `user` WHERE `id` = %d", $id);
+        $answer = $this->userRepository->findOne($sql);
+        if (!$answer['body']) {
+            return [
+                'body' => ERROR_MESSAGES['404'],
+                'status' => 404,
+            ];
+        }
+        $userFolderName =
+            $_SERVER['DOCUMENT_ROOT']
+            . '/' . UPLOAD_USER_ROOT
+            . '/' . $answer['body']['folder'];
+
+        if (!rmdir($userFolderName)) {
+            return [
+                'body' => 'Не удалось удалить папку и пользователя',
+                'status' => 409,
+            ];
+        }
+
         $sql = sprintf("DELETE FROM user WHERE id = %d", $id);
         return $this->userRepository->delete($sql);
     }
@@ -270,6 +314,24 @@ class UserProvider
     }
 
     /**
+     * получить пользователя по его токену
+     *
+     * @param string $token
+     * @return array
+     */
+    public function getTokenUser(string $token): array
+    {
+        $sql = sprintf(
+            "SELECT * FROM `token`
+            JOIN `user` ON `user`.`id` = `token`.`user_id`
+            WHERE `token`.`token`='%s'",
+            $token
+        );
+        return $this->apiTokenRepository->findOne($sql);
+    }
+
+    /**
+     * верификация токена
      * @param User $user
      * @param array $tokenData
      * @return boolean

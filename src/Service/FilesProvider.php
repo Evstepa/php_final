@@ -346,6 +346,13 @@ class FilesProvider
             ];
         }
 
+        if (file_exists($folderTo)) {
+            return [
+                'body' => ERROR_MESSAGES['409'],
+                'status' => 409,
+            ];
+        }
+
         if (move_uploaded_file($folderFrom, $folderTo)) {
             $answer = $this->fileRepository->addFile([
                 'userId' => $answer['body']['userId'],
@@ -642,6 +649,12 @@ class FilesProvider
         ]);
     }
 
+    /**
+     * проверка наличия записи о доступе к файлу
+     *
+     * @param array $userData
+     * @return boolean
+     */
     private function findUserFileAccess(array $userData): bool
     {
         $sql = sprintf(

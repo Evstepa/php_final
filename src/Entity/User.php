@@ -34,7 +34,6 @@ final class User
     public function __construct()
     {
         $this->createdAt = new DateTime();
-        // $this->updatedAt = new DateTime();
     }
 
     public function setId(int $id): self
@@ -114,10 +113,12 @@ final class User
     public function setFolder(): self
     {
         $this->folder = sprintf(
-            "%s_%s_%s",
+            "%s_%s_%d-%d-%d",
             $this->name,
             $this->surname,
-            $this->getCreatedAt()->format('y-m-d')
+            mt_rand(0, 1000),
+            mt_rand(0, 1000),
+            mt_rand(0, 1000)
         );
         return $this;
     }
@@ -175,7 +176,7 @@ final class User
             $this->setEmail($userData['email']);
         }
         if (isset($userData['password'])) {
-            $this->setPassword($userData['password']);
+            $this->setPassword(password_hash($userData['password'], PASSWORD_DEFAULT));
         }
         if (isset($userData['name'])) {
             $this->setName($userData['name']);
@@ -191,6 +192,11 @@ final class User
         }
         if (isset($userData['folder'])) {
             $this->folder = $userData['folder'];
+        }
+        if (isset($userData['createdAt'])) {
+            $this->createdAt = new DateTime($userData['createdAt']);
+        } else {
+            $this->createdAt = new DateTime();
         }
         $this->setUpdatedAt();
 
@@ -212,7 +218,6 @@ final class User
         $userData['surname'] = isset($this->surname) ? $this->getSurname() : null;
         $userData['age'] = isset($this->age) ? $this->getAge() : null;
         $userData['folder'] = isset($this->folder) ? $this->getFolder() : null;
-        $userData['token'] = isset($this->apiToken) ? $this->getApiToken() : null;
         $userData['createdAt'] = isset($this->createdAt) ? $this->getCreatedAt()->format('Y-m-d H:i:s') : null;
         $userData['updatedAt'] = isset($this->updatedAt) ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null;
 

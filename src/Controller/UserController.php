@@ -21,9 +21,16 @@ class UserController
      *
      * @return array
      */
-    public function getUserList(): array
+    public function getUserList(array $userData): array
     {
-        return $this->userProvider->getUserList();
+        if ($this->verifyUserToken($userData['token'])) {
+            return $this->userProvider->getUserList();
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
     }
 
     /**
@@ -34,7 +41,14 @@ class UserController
      */
     public function getUser(array $userData): array
     {
-        return $this->userProvider->getUser(['id', $userData['id']]);
+        if ($this->verifyUserToken($userData['token'])) {
+            return $this->userProvider->getUser(['id' => $userData['id']]);
+        } else {
+            return [
+                'body' => ERROR_MESSAGES['401'],
+                'status' => 401,
+            ];
+        }
     }
 
     /**
@@ -70,10 +84,7 @@ class UserController
      */
     public function logoutUser(array $userData): array
     {
-        if (
-            isset($_SESSION['currentUser']) && isset($userData['token'])
-            && $_SESSION['currentUser'] === $userData['token']
-        ) {
+        if ($this->verifyUserToken($userData['token'])) {
             return $this->userProvider->logoutUser($userData);
         } else {
             return [
@@ -91,10 +102,7 @@ class UserController
      */
     public function updateUser(array $userData): array
     {
-        if (
-            isset($_SESSION['currentUser']) && isset($userData['token'])
-            && $_SESSION['currentUser'] === $userData['token']
-        ) {
+        if ($this->verifyUserToken($userData['token'])) {
             return $this->userProvider->updateUser($userData);
         } else {
             return [
@@ -179,21 +187,25 @@ class UserController
     }
 
     /**
+     * верификация пользователя по токену
+     *
      * @param string $requestToken
      * @return boolean
      */
     public function verifyUserToken(string $requestToken): bool
     {
         $user = new User();
-        $user->fillUserData($this->userProvider->getUser(['id' => $requestToken['user_id']])['body']);
+        $user->fillUserData(
+            $this->userProvider->getTokenUser($requestToken)['body']
+        );
 
         $sessionToken = isset($_SESSION['currentUser']) ? $_SESSION['currentUser'] : '';
-        $adminToken = $this->userProvider->getToken($requestToken)['body'];
+        $userToken = $this->userProvider->getToken($requestToken)['body'];
 
         return (
-            $user->getId() === $adminToken['user_id']
+            $user->getId() === $userToken['user_id']
             && $requestToken === $sessionToken
-            && $this->userProvider->verifyToken($user, $adminToken)
+            && $this->userProvider->verifyToken($user, $userToken)
         );
     }
 }

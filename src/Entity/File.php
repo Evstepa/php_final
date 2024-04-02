@@ -51,11 +51,6 @@ final class File
         return implode('/', array_slice($this->path, 0, -1));
     }
 
-    // public function getPathDb(): string
-    // {
-    //     return implode('/', array_slice($this->path, 0, -1));
-    // }
-
     public function setOwners(string $owners): self
     {
         $this->owners = (array) $owners;

@@ -56,7 +56,7 @@ function getSqlCreateUpdate(array $data): bool
 
     if (isset($key)) {
         $obj = array_filter($obj, function ($value, $key) {
-            return !(is_null($value) || $key == 'role' || $key == 'createdAt');
+            return !(is_null($value) || $key == 'role');
         }, ARRAY_FILTER_USE_BOTH);
     }
 

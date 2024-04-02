@@ -10,19 +10,26 @@ class FilesController
 {
     private FilesProvider $filesProvider;
 
+    private UserController $userController;
+
+    private AdminController $adminController;
+
     public function __construct()
     {
         $this->filesProvider = new FilesProvider();
+        $this->userController = new UserController();
+        $this->adminController = new AdminController();
     }
 
     /**
+     * получить список файлов пользователя
      * route('/files/list', method='GET')
      *
      * @return array
      */
     public function getFilesList(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             return $this->filesProvider->getFilesList(['token' => $userData['token']]);
         } else {
             return [
@@ -33,13 +40,14 @@ class FilesController
     }
 
     /**
+     * получить информацию о файле
      * route('/files/get/{id}', method='GET')
      *
      * @return array
      */
     public function getFileInfo(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             return $this->filesProvider->getFileInfo($userData);
         } else {
             return [
@@ -50,13 +58,14 @@ class FilesController
     }
 
     /**
+     * удалить файл
      * route('/files/remove/{id}', method='DELETE')
      *
      * @return array
      */
     public function removeFile(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             return $this->filesProvider->deleteFile($userData);
         } else {
             return [
@@ -67,13 +76,14 @@ class FilesController
     }
 
     /**
+     * переименовать файл
      * route('/files/rename/{id}', method='PUT')
      *
      * @return array
      */
     public function renameFile(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             return $this->filesProvider->renameFile($userData);
         } else {
             return [
@@ -84,13 +94,21 @@ class FilesController
     }
 
     /**
+     * загрузить файл
      * route('/files/add', method='POST')
      *
      * @return array
      */
     public function addFile(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($_FILES['file']['size'] > 2097152) {
+            return [
+                'body' => 'Слишком большой файл',
+                'status' => 409,
+            ];
+        }
+
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->addFile($userData);
         } else {
@@ -109,7 +127,7 @@ class FilesController
      */
     public function getDirInfo(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->getDirInfo($userData);
         } else {
@@ -128,7 +146,7 @@ class FilesController
      */
     public function addDir(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->addDir($userData);
         } else {
@@ -147,7 +165,7 @@ class FilesController
      */
     public function renameDir(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->renameDir($userData);
         } else {
@@ -166,7 +184,7 @@ class FilesController
      */
     public function removeDir(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->deleteDir($userData);
         } else {
@@ -185,7 +203,7 @@ class FilesController
      */
     public function getShareUserList(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->getShareUserList($userData);
         } else {
@@ -196,9 +214,15 @@ class FilesController
         }
     }
 
+    /**
+     * добавить доступ к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
     public function addShareFileUser(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->addShareFileUser($userData);
         } else {
@@ -209,9 +233,15 @@ class FilesController
         }
     }
 
+    /**
+     * прекратить доступ к файлу
+     *
+     * @param array $userData
+     * @return array
+     */
     public function deleteShareFileUser(array $userData): array
     {
-        if ($_SESSION['currentUser'] === $userData['token']) {
+        if ($this->verify($userData['token'])) {
             $userData = array_merge($userData, $_FILES);
             return $this->filesProvider->unshareFileUser($userData);
         } else {
@@ -219,6 +249,18 @@ class FilesController
                 'body' => ERROR_MESSAGES['401'],
                 'status' => 401,
             ];
+        }
+    }
+
+    private function verify(string $token): bool
+    {
+        if (
+            isset($_SESSION['role'])
+            && in_array('ROLE_ADMIN', $_SESSION['role'])
+        ) {
+            return $this->adminController->verifyAdminToken($token);
+        } else {
+            return $this->userController->verifyUserToken($token);
         }
     }
 }
