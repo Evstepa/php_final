@@ -36,28 +36,67 @@ final class User
         $this->createdAt = new DateTime();
     }
 
+    /**
+     * Установить id
+     *
+     * @param integer $id
+     * @return self
+     */
     public function setId(int $id): self
     {
         $this->id = $id;
         return $this;
     }
 
+    /**
+     * Получить id
+     *
+     * @return integer
+     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
+    /**
+     * Установить email
+     *
+     * @param string $email
+     * @return self
+     */
     public function setEmail(string $email): self
     {
         $this->email = $email;
         return $this;
     }
 
+    /**
+     * Получить email
+     *
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    /**
+     * Установить роли
+     *
+     * @param string $roles
+     * @return self
+     */
+    public function setRoles(string $roles): self
+    {
+        $this->role = (array) $roles;
+        return $this;
+    }
+
+    /**
+     * Получить роли
+     *
+     * @return array
+     */
     public function getRoles(): array
     {
         $roles = $this->role;
@@ -66,50 +105,77 @@ final class User
         return array_unique($roles);
     }
 
-    public function setRoles(string $roles): self
-    {
-        $this->role = (array) $roles;
-        return $this;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
+    /**
+     * Установить пароль
+     *
+     * @param string $password
+     * @return self
+     */
     public function setPassword(string $password): self
     {
         $this->password = $password;
         return $this;
     }
 
-    public function getName(): ?string
+    /**
+     * Получить пароль
+     *
+     * @return string
+     */
+    public function getPassword(): string
     {
-        return $this->name;
+        return $this->password;
     }
 
+    /**
+     * Установить имя
+     *
+     * @param string|null $name
+     * @return self
+     */
     public function setName(?string $name): self
     {
         $this->name = $name;
         return $this;
     }
 
-    public function getSurname(): ?string
+    /**
+     * Получить имя
+     *
+     * @return string|null
+     */
+    public function getName(): ?string
     {
-        return $this->surname;
+        return $this->name;
     }
 
+    /**
+     * Установить фамилию
+     *
+     * @param string|null $surname
+     * @return self
+     */
     public function setSurname(?string $surname): self
     {
         $this->surname = $surname;
         return $this;
     }
 
-    public function getFolder(): ?string
+    /**
+     * Получить фамилию
+     *
+     * @return string|null
+     */
+    public function getSurname(): ?string
     {
-        return $this->folder;
+        return $this->surname;
     }
 
+    /**
+     * Установить корневую папку пользователя
+     *
+     * @return self
+     */
     public function setFolder(): self
     {
         $this->folder = sprintf(
@@ -123,38 +189,75 @@ final class User
         return $this;
     }
 
-    public function getApiToken(): ?ApiToken
+    /**
+     * Получить корневую папку пользователя
+     *
+     * @return string|null
+     */
+    public function getFolder(): ?string
     {
-        return $this->apiToken;
+        return $this->folder;
     }
 
+    /**
+     * Установить токен
+     *
+     * @param ApiToken $apiToken
+     * @return self
+     */
     public function setApiToken(ApiToken $apiToken): self
     {
         $this->apiToken = $apiToken;
         return $this;
     }
 
-    public function getAge(): ?int
+    /**
+     * Получить токен
+     *
+     * @return ApiToken|null
+     */
+    public function getApiToken(): ?ApiToken
     {
-        return $this->age;
+        return $this->apiToken;
     }
 
+    /**
+     * Установить возраст
+     *
+     * @param integer $age
+     * @return self
+     */
     public function setAge(int $age): self
     {
         $this->age = $age;
         return $this;
     }
 
+    /**
+     * Получить возраст
+     *
+     * @return integer|null
+     */
+    public function getAge(): ?int
+    {
+        return $this->age;
+    }
+
+    /**
+     * Полчить время создания (регистрации) пользователя
+     *
+     * @return DateTime
+     */
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): DateTime
-    {
-        return $this->updatedAt;
-    }
-
+    /**
+     * Установить время обновления данных о пользователе
+     *
+     * @return self
+     */
     public function setUpdatedAt(): self
     {
         $this->updatedAt = new DateTime();
@@ -162,7 +265,17 @@ final class User
     }
 
     /**
-     * заполнение полей объекта данными
+     * Получить время обновления данных о пользователе
+     *
+     * @return DateTime
+     */
+    public function getUpdatedAt(): DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * Заполнение полей объекта данными
      *
      * @param array $userData
      * @return self
@@ -204,7 +317,7 @@ final class User
     }
 
     /**
-     * выгрузка данных из полей объекта
+     * Выгрузка данных из полей объекта в массив
      *
      * @return array
      */

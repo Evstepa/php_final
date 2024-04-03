@@ -17,17 +17,14 @@ class AdminController
     }
 
     /**
+     * Список пользователей с полными данными
      * route('/admin/users/list', method='GET')
      *
      * @return array
      */
     public function getUsersList(array $userData): array
     {
-        if (
-            isset($_SESSION['role'])
-            && in_array('ROLE_ADMIN', $_SESSION['role'])
-            && $this->verifyAdminToken($userData['token'])
-        ) {
+        if ($this->verifyAdminToken($userData['token'])) {
             return $this->userProvider->getUserList();
         } else {
             return [
@@ -38,6 +35,7 @@ class AdminController
     }
 
     /**
+     * Данные конкретного пользователя
      * route('/admin/users/get/{id}', method='GET')
      *
      * @param integer $id
@@ -45,11 +43,7 @@ class AdminController
      */
     public function getUser(array $userData): array
     {
-        if (
-            isset($_SESSION['role'])
-            && in_array('ROLE_ADMIN', $_SESSION['role'])
-            && $this->verifyAdminToken($userData['token'])
-        ) {
+        if ($this->verifyAdminToken($userData['token'])) {
             return $this->userProvider->getUser(['id' => $userData['id']]);
         } else {
             return [
@@ -60,6 +54,7 @@ class AdminController
     }
 
     /**
+     * Удаление пользователя
      * route('/admin/users/delete/{id}', method='DELETE'))
      *
      * @param array $userData
@@ -67,11 +62,7 @@ class AdminController
      */
     public function deleteUser(array $userData): array
     {
-        if (
-            isset($_SESSION['role'])
-            && in_array('ROLE_ADMIN', $_SESSION['role'])
-            && $this->verifyAdminToken($userData['token'])
-        ) {
+        if ($this->verifyAdminToken($userData['token'])) {
             return $this->userProvider->deleteUser($userData['id']);
         } else {
             return [
@@ -82,6 +73,7 @@ class AdminController
     }
 
     /**
+     * Изменение данных ползователя
      * route('/admin/users/update/{id}', method='PUT'))
      *
      * @param array $userData
@@ -89,11 +81,7 @@ class AdminController
      */
     public function updateUser(array $userData): array
     {
-        if (
-            isset($_SESSION['role'])
-            && in_array('ROLE_ADMIN', $_SESSION['role'])
-            && $this->verifyAdminToken($userData['token'])
-        ) {
+        if ($this->verifyAdminToken($userData['token'])) {
             return $this->userProvider->updateUser($userData);
         } else {
             return [
@@ -104,16 +92,23 @@ class AdminController
     }
 
     /**
+     * Проверка авторизации администратора
      * @param string $requestToken
      * @return boolean
      */
     public function verifyAdminToken(string $requestToken): bool
     {
         $user = new User();
-        $user->fillUserData($this->userProvider->getUser(['role' => 'ROLE_ADMIN'])['body']);
+        $user->fillUserData(
+            $this->userProvider->getUser(['role' => 'ROLE_ADMIN'])['body']
+        );
+
+        $adminToken = $this->userProvider->getToken($requestToken)['body'];
+        if (!$adminToken) {
+            return false;
+        }
 
         $sessionToken = isset($_SESSION['currentUser']) ? $_SESSION['currentUser'] : '';
-        $adminToken = $this->userProvider->getToken($requestToken)['body'];
 
         return (
             $user->getId() === $adminToken['user_id']

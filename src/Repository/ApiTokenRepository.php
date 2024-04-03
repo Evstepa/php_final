@@ -6,9 +6,9 @@ namespace App\Repository;
 
 use PDO;
 use App\Core\Db;
-use PDOException;
 use App\Entity\User;
 use App\Entity\ApiToken;
+use PDOException;
 
 final class ApiTokenRepository extends Db
 {
@@ -22,13 +22,15 @@ final class ApiTokenRepository extends Db
     }
 
     /**
+     * Вход пользователя в системы и создание токена
+     *
      * @param ApiToken $apiToken
      * @return array
      */
     public function create(ApiToken $apiToken): array
     {
-
-        $sql = "INSERT INTO token (id, user_id, token, expiresAt) VALUES (null, :user_id, :token, :expiresdAt)";
+        $sql = "INSERT INTO token (id, user_id, token, expiresAt)
+            VALUES (null, :user_id, :token, :expiresdAt)";
         $state = $this->currentConnect->prepare($sql);
 
         try {
@@ -56,6 +58,8 @@ final class ApiTokenRepository extends Db
     }
 
     /**
+     * Выход пользователя из системы
+     *
      * @param array $userData
      * @return array
      */
@@ -82,6 +86,8 @@ final class ApiTokenRepository extends Db
     }
 
     /**
+     * Удаление токена
+     *
      * @param User $user
      * @return array
      */
@@ -90,23 +96,9 @@ final class ApiTokenRepository extends Db
         $sql = sprintf("SELECT * FROM token WHERE user_id = '%d'", $user->getId());
         $answer = $this->findOne($sql);
 
-        $ans = null;
-
         if ($answer['body']) {
             $sql = sprintf("DELETE FROM token WHERE user_id = '%d'", $user->getId());
-            $ans = $this->currentConnect->prepare($sql)->execute();
-        }
-
-        if ($ans) {
-            $answer = [
-                'body' => 'Токен успешно удалён',
-                'status' => 200,
-            ];
-        } else {
-            $answer = [
-                'body' => 'Токен не найден',
-                'status' => 404,
-            ];
+            return $this->delete($sql);
         }
 
         return $answer;

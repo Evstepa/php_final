@@ -6,7 +6,6 @@ namespace App\Repository;
 
 use PDO;
 use App\Core\Db;
-use PDOException;
 use App\Entity\User;
 
 final class UserRepository extends Db
@@ -19,6 +18,8 @@ final class UserRepository extends Db
     }
 
     /**
+     * Создание пользователя в БД
+     *
      * @param User $user
      * @return array
      */
@@ -46,6 +47,8 @@ final class UserRepository extends Db
     }
 
     /**
+     * Получения данных обо всех пользователях
+     *
      * @return array
      */
     public function findAllGeneralData(): array
@@ -59,6 +62,8 @@ final class UserRepository extends Db
     }
 
     /**
+     * Получение данных об одном пользователе
+     *
      * @param array $criteria
      * @return array|null
      */
@@ -73,6 +78,8 @@ final class UserRepository extends Db
     }
 
     /**
+     * Получить последнюю запись из таблицы
+     *
      * @return array
      */
     public function findlLast(): array
@@ -83,6 +90,8 @@ final class UserRepository extends Db
     }
 
     /**
+     * Изменить данные о пользователе
+     *
      * @param User $user
      * @return array
      */

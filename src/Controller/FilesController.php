@@ -22,7 +22,7 @@ class FilesController
     }
 
     /**
-     * получить список файлов пользователя
+     * Получить список файлов пользователя
      * route('/files/list', method='GET')
      *
      * @return array
@@ -40,7 +40,7 @@ class FilesController
     }
 
     /**
-     * получить информацию о файле
+     * Получить информацию о файле
      * route('/files/get/{id}', method='GET')
      *
      * @return array
@@ -58,7 +58,7 @@ class FilesController
     }
 
     /**
-     * удалить файл
+     * Удалить файл
      * route('/files/remove/{id}', method='DELETE')
      *
      * @return array
@@ -76,7 +76,7 @@ class FilesController
     }
 
     /**
-     * переименовать файл
+     * Переименовать файл
      * route('/files/rename/{id}', method='PUT')
      *
      * @return array
@@ -94,7 +94,7 @@ class FilesController
     }
 
     /**
-     * загрузить файл
+     * Загрузить файл
      * route('/files/add', method='POST')
      *
      * @return array
@@ -120,7 +120,7 @@ class FilesController
     }
 
     /**
-     * информация о папке
+     * Информация о папке
      *
      * @param array $userData
      * @return array
@@ -139,7 +139,7 @@ class FilesController
     }
 
     /**
-     * создание папки
+     * Создание папки
      *
      * @param array $userData
      * @return array
@@ -158,7 +158,7 @@ class FilesController
     }
 
     /**
-     * переименование папки
+     * Переименование папки
      *
      * @param array $userData
      * @return array
@@ -177,7 +177,7 @@ class FilesController
     }
 
     /**
-     * удаление папки
+     * Удаление папки
      *
      * @param array $userData
      * @return array
@@ -196,7 +196,7 @@ class FilesController
     }
 
     /**
-     * список пользователей, имеющих доступ к файлу
+     * Список пользователей, имеющих доступ к файлу
      *
      * @param array $userData
      * @return array
@@ -215,7 +215,7 @@ class FilesController
     }
 
     /**
-     * добавить доступ к файлу
+     * Предоставить пользователю доступ к файлу
      *
      * @param array $userData
      * @return array
@@ -234,7 +234,7 @@ class FilesController
     }
 
     /**
-     * прекратить доступ к файлу
+     * Прекратить доступ к файлу
      *
      * @param array $userData
      * @return array
@@ -252,6 +252,12 @@ class FilesController
         }
     }
 
+    /**
+     * Аутентификация пользователя
+     *
+     * @param string $token
+     * @return boolean
+     */
     private function verify(string $token): bool
     {
         if (

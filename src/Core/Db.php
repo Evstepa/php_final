@@ -48,8 +48,10 @@ class Db
     }
 
     /**
+     * Найти все записи по запросу
+     *
      * @param string $sql
-     * @return array|null
+     * @return array
      */
     public function findAll(string $sql): ?array
     {
@@ -65,10 +67,12 @@ class Db
     }
 
     /**
+     * Найти одну запись по запросу
+     *
      * @param string $sql
-     * @return array|null
+     * @return array
      */
-    public function findOne(string $sql): ?array
+    public function findOne(string $sql): array
     {
         $db = self::getInstance();
         $state = $db->connect->prepare($sql);
@@ -82,6 +86,8 @@ class Db
     }
 
     /**
+     * Удалить запись по запросу
+     *
      * @param string $sql
      * @return array
      */

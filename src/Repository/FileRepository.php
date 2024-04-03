@@ -8,7 +8,6 @@ use PDO;
 use App\Core\Db;
 use App\Entity\File;
 use PDOException;
-use App\Entity\User;
 
 final class FileRepository extends Db
 {
@@ -19,6 +18,13 @@ final class FileRepository extends Db
         $this->currentConnect = self::getInstance()->getConnection();
     }
 
+    /**
+     * Изменение данных о файле в БД
+     *
+     * @param File $file
+     * @param string $newFileName
+     * @return array
+     */
     public function rename(File $file, string $newFileName): array
     {
         $sql = sprintf(
@@ -44,7 +50,7 @@ final class FileRepository extends Db
     }
 
     /**
-     * загрузка файла
+     * Загрузка файла
      *
      * @param array $fileData
      * @return array
@@ -55,7 +61,10 @@ final class FileRepository extends Db
         try {
             $state = $this->currentConnect->beginTransaction();
 
-            $sql = sprintf("INSERT INTO `file`(`id`, `full_path`) VALUES (null, '%s')", $fileData['fullPath']);
+            $sql = sprintf(
+                "INSERT INTO `file`(`id`, `full_path`) VALUES (null, '%s')",
+                $fileData['fullPath']
+            );
             $state = $this->currentConnect->prepare($sql);
             $answer = $state->execute();
             $fileId = 0;
@@ -63,7 +72,12 @@ final class FileRepository extends Db
                 throw new PDOException("Ошибка боступа к БД");
             }
             $fileId = $this->currentConnect->lastInsertId();
-            $sql = sprintf("INSERT INTO `access`(`id`, `user_id`, `file_id`) VALUES (null, '%s', '%s')", $fileData['userId'], $fileId);
+            $sql = sprintf(
+                "INSERT INTO `access`(`id`, `user_id`, `file_id`)
+                VALUES (null, '%s', '%s')",
+                $fileData['userId'],
+                $fileId
+            );
             $state = $this->currentConnect->prepare($sql);
             $answer = $state->execute();
         } catch (PDOException $e) {
@@ -81,6 +95,12 @@ final class FileRepository extends Db
         ];
     }
 
+    /**
+     * Удаление файла
+     *
+     * @param File $file
+     * @return array
+     */
     public function remove(File $file): array
     {
         $sql = sprintf("DELETE FROM `file` WHERE id = '%d'", $file->getId());
@@ -88,7 +108,7 @@ final class FileRepository extends Db
     }
 
     /**
-     * список пользователей, имеющих доступ к файлу
+     * Список пользователей, имеющих доступ к файлу
      *
      * @param integer $fileId
      * @return array
@@ -107,7 +127,7 @@ final class FileRepository extends Db
     }
 
     /**
-     * предоставление доступа к файлу
+     * Предоставление доступа к файлу
      *
      * @param array $fileData
      * @return array
@@ -136,6 +156,12 @@ final class FileRepository extends Db
         }
     }
 
+    /**
+     * Прекращение доступа к файлу
+     *
+     * @param array $fileData
+     * @return array
+     */
     public function unshareFileUser(array $fileData): array
     {
         $sql = sprintf(

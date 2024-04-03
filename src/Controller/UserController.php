@@ -17,6 +17,7 @@ class UserController
     }
 
     /**
+     * Список пользователей (ограниченные данные)
      * route('/users/list', method='GET')
      *
      * @return array
@@ -34,6 +35,7 @@ class UserController
     }
 
     /**
+     * Данные конкретного пользователя
      * route('/users/get/{id}', method='GET')
      *
      * @param integer $id
@@ -52,6 +54,7 @@ class UserController
     }
 
     /**
+     * Регистрация нового пользователя
      * route('/users/register', method='POST')
      *
      * @param array $userData
@@ -63,6 +66,7 @@ class UserController
     }
 
     /**
+     * Вход пользователя в систему
      * route('/users/login', method='POST'))
      *
      * @param array $userData
@@ -77,6 +81,7 @@ class UserController
     }
 
     /**
+     * Выход пользователя из системы
      * route('/users/logout', method='PUT'))
      *
      * @param array $userData
@@ -95,6 +100,7 @@ class UserController
     }
 
     /**
+     * Изменение данных пользователя
      * route('/users/update', method='PUT'))
      *
      * @param array $userData
@@ -113,17 +119,14 @@ class UserController
     }
 
     /**
-     * поиск пользователя по email
+     * Поиск пользователя по email
      *
      * @param array $userData
      * @return array
      */
     public function searchUserByEmail(array $userData): array
     {
-        if (
-            isset($_SESSION['currentUser']) && isset($userData['token'])
-            && $_SESSION['currentUser'] === $userData['token']
-        ) {
+        if ($this->verifyUserToken($userData['token'])) {
             return $this->userProvider->getUser(['email' => $userData['email']]);
         } else {
             return [
@@ -134,7 +137,7 @@ class UserController
     }
 
     /**
-     * запрос на сброс пароля
+     * Запрос на сброс пароля
      * route('/users/reset_password', method='GET')
      *
      * @param array $userData
@@ -160,7 +163,7 @@ class UserController
     }
 
     /**
-     * установка нового пароля
+     * Установка нового пароля
      * route('/users/set_password', method='POST')
      *
      * @param array $userData
@@ -170,6 +173,7 @@ class UserController
     {
         if (
             isset($userData['token'])
+            && $this->verifyUserToken($userData['token'])
             && isset($userData['newPassword'])
             && isset($userData['repeatNewPassword'])
             && $userData['repeatNewPassword'] == $userData['newPassword']
@@ -187,7 +191,7 @@ class UserController
     }
 
     /**
-     * верификация пользователя по токену
+     * Верификация пользователя по токену
      *
      * @param string $requestToken
      * @return boolean
@@ -199,8 +203,11 @@ class UserController
             $this->userProvider->getTokenUser($requestToken)['body']
         );
 
-        $sessionToken = isset($_SESSION['currentUser']) ? $_SESSION['currentUser'] : '';
         $userToken = $this->userProvider->getToken($requestToken)['body'];
+        if (!$userToken) {
+            return false;
+        }
+        $sessionToken = isset($_SESSION['currentUser']) ? $_SESSION['currentUser'] : '';
 
         return (
             $user->getId() === $userToken['user_id']

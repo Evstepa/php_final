@@ -3,11 +3,7 @@
 namespace App\Entity;
 
 use DateTime;
-use App\Entity\User;
 use DateTimeInterface;
-// use App\Repository\ApiTokenRepository;
-// use Doctrine\DBAL\Types\Types;
-// use Doctrine\ORM\Mapping as ORM;
 
 class ApiToken
 {
@@ -22,20 +18,33 @@ class ApiToken
     public function __construct(User $user)
     {
         $this->user = $user;
-        // $this->setToken();
-        // $this->expiresAt = new \DateTime('+1 day');
     }
 
-    public function getId(): ?int
+    /**
+     * Получить id токена
+     *
+     * @return integer
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
+    /**
+     * Получить токен
+     *
+     * @return string|null
+     */
     public function getToken(): ?string
     {
         return $this->apiToken;
     }
 
+    /**
+     * Установить токен
+     *
+     * @return void
+     */
     public function setToken(): void
     {
         $this->apiToken = sprintf(
@@ -49,28 +58,41 @@ class ApiToken
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
-        // или
-        // $this->apiToken = bin2hex(random_bytes (16));
-        $this->expiresAt = new \DateTime('+1 hour');
+        $this->expiresAt = new DateTime('+1 hour');
     }
 
-    public function getExpiresAt(): ?DateTimeInterface
+    /**
+     * Получить время окончания действия токена
+     *
+     * @return DateTimeInterface
+     */
+    public function getExpiresAt(): DateTimeInterface
     {
         return $this->expiresAt;
     }
 
+    /**
+     * Получить пользователя
+     *
+     * @return User|null
+     */
     public function getUser(): ?User
     {
         return $this->user;
     }
 
+    /**
+     * Проверка срока действия токена
+     *
+     * @return boolean
+     */
     public function isExpired()
     {
-        return $this->getExpiresAt() < new \DateTime();
+        return $this->getExpiresAt() < new DateTime();
     }
 
     /**
-     * заполнение полей данными
+     * Заполнение полей данными
      *
      * @param array $tokenData
      * @return self

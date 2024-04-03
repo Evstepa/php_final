@@ -12,8 +12,6 @@ final class File
 
     private int $size = 0;
 
-    private array $owners = [];
-
     private array $path = [];
 
     private string $folder = '/';
@@ -30,57 +28,74 @@ final class File
         $this->setLastAccessAt();
     }
 
+    /**
+     * Получить id файла в БД
+     *
+     * @return integer
+     */
     public function getId(): int
     {
         return $this->id;
     }
 
+    /**
+     * Установить путь поиска файла в файловой системе в виде массива
+     *
+     * @param string $path
+     * @return self
+     */
     private function setPath(string $path): self
     {
         $this->path = explode('/', $path);
         return $this;
     }
 
+    /**
+     * вернуть полный путь поиска файла в виде строки
+     *
+     * @return string
+     */
     public function getPath(): string
     {
         return implode('/', $this->path);
     }
 
+    /**
+     * Вернуть путь поиска файла в виде строки без имени файла
+     *
+     * @return string
+     */
     public function getShortPath(): string
     {
         return implode('/', array_slice($this->path, 0, -1));
     }
 
-    public function setOwners(string $owners): self
-    {
-        $this->owners = (array) $owners;
-        return $this;
-    }
-
-    public function getOwners(): array
-    {
-        $owners = $this->owners;
-        // $owners[] = ; определить владельца = пользователя
-
-        return array_unique($owners);
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
+    /**
+     * Установить имя файла
+     *
+     * @return self
+     */
     public function setName(): self
     {
         $this->name = $this->path[count($this->path) - 1];
         return $this;
     }
 
-    public function getFolder(): string
+    /**
+     * Получить имя файла
+     *
+     * @return string
+     */
+    public function getName(): string
     {
-        return $this->folder;
+        return $this->name;
     }
 
+    /**
+     * Установить имя папки последнего уровня
+     *
+     * @return self
+     */
     public function setFolder(): self
     {
         $folderKey = array_search(UPLOAD_USER_ROOT, $this->path) + 1;
@@ -89,11 +104,21 @@ final class File
         return $this;
     }
 
-    public function getSize(): int
+    /**
+     * Получить имя папки последнего уровня
+     *
+     * @return string
+     */
+    public function getFolder(): string
     {
-        return $this->size;
+        return $this->folder;
     }
 
+    /**
+     * Установить размер файла
+     *
+     * @return self
+     */
     public function setSize(): self
     {
         $this->size = filesize($this->getPath());
@@ -101,6 +126,21 @@ final class File
         return $this;
     }
 
+    /**
+     * Получить размер файла
+     *
+     * @return integer
+     */
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    /**
+     * Установить время последнего обращения к файлу
+     *
+     * @return self
+     */
     public function setLastAccessAt(): self
     {
         if (!fileatime($this->getPath())) {
@@ -114,20 +154,34 @@ final class File
         return $this;
     }
 
+    /**
+     * Вернуть время последнего обращения к файлу
+     *
+     * @return string
+     */
     public function getLastAccessAt(): string
     {
         return $this->lastAccessAt->format('F d Y H:i:s');
     }
 
+    /**
+     * Проверить, является ли одъект файлом
+     *
+     * @return boolean
+     */
     public function isFile(): bool
     {
         return is_file($this->name);
     }
 
+    /**
+     * Выгрузка данных из объекта в массив
+     *
+     * @return array
+     */
     public function exportData(): array
     {
         return [
-            // 'id' => $this->getId(),
             'name' => $this->getName(),
             'size' => $this->getSize(),
             'folder' => $this->getFolder(),

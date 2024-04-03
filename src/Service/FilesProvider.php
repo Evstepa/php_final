@@ -29,7 +29,7 @@ class FilesProvider
     }
 
     /**
-     * полный список всех каталогов с путями
+     * Полный список всех каталогов с путями
      *
      * @return void
      */
@@ -53,7 +53,7 @@ class FilesProvider
     }
 
     /**
-     * поиск папки для загрузки файла
+     * Поиск папки для загрузки файла
      *
      * @param string $folderName
      * @return integer
@@ -69,22 +69,13 @@ class FilesProvider
     }
 
     /**
-     * полный список всех файлов с путями
+     * Полный список всех файлов с путями
      *
      * @param int $userId
      * @return void
      */
     public function getFullFileList(int $userId): void
     {
-        // $iterator = new RecursiveIteratorIterator(
-        //     new RecursiveDirectoryIterator($this->currentUserRoot)
-        // );
-        // foreach ($iterator as $file) {
-        //     if ($file->isFile()) {
-        //         $this->currentUserFileslist[] = $file;
-        //     }
-        // }
-
         $sql = sprintf(
             "SELECT `file`.`id`, `file`.`full_path`
             FROM `access`
@@ -110,7 +101,8 @@ class FilesProvider
     }
 
     /**
-     * верификация пользователя и установка значений полей $currentUserRoot и $currentUserFileslist
+     * Верификация пользователя
+     * и установка значений полей $currentUserRoot и $currentUserFileslist
      *
      * @param array $userData
      * @return array
@@ -145,7 +137,7 @@ class FilesProvider
     }
 
     /**
-     * список всех файлов текущего пользователя
+     * Список всех файлов текущего пользователя
      *
      * @param array $userData
      * @return array
@@ -174,7 +166,7 @@ class FilesProvider
     }
 
     /**
-     * получение информации о файле по его id
+     * Получение информации о файле по его id
      *
      * @param array $userData
      * @return array
@@ -203,7 +195,7 @@ class FilesProvider
     }
 
     /**
-     * удаление файла
+     * Удаление файла
      *
      * @param array $userData
      * @return array
@@ -241,7 +233,7 @@ class FilesProvider
     }
 
     /**
-     * переименование файла
+     * Переименование файла
      *
      * @param array $userData
      * @return array
@@ -311,7 +303,7 @@ class FilesProvider
     }
 
     /**
-     * загрузка файла
+     * Загрузка файла
      *
      * @param array $userData
      * @return array
@@ -334,7 +326,10 @@ class FilesProvider
 
         $folderFrom = $userData['file']['tmp_name'];
 
-        $folderTo = $folderId !== -1 ? $this->currentUserFolderslist[$folderId] : $this->currentUserRoot;
+        $folderTo =
+            $folderId !== -1
+            ? $this->currentUserFolderslist[$folderId]
+            : $this->currentUserRoot;
         $folderTo .= '\\' . $userData['file']['name'];
         $shotFolderTo = '\\' . implode('\\', array_slice(explode('\\', $folderTo), 5));
         $shotFolderTo = str_replace('\\', '/', $shotFolderTo);
@@ -377,7 +372,7 @@ class FilesProvider
     }
 
     /**
-     * информация о папке - список файлов папки
+     * Информация о папке - список файлов папки
      *
      * @param array $userData
      * @return array
@@ -401,7 +396,7 @@ class FilesProvider
     }
 
     /**
-     * создание папки
+     * Создание папки
      *
      * @param array $userData
      * @return array
@@ -445,7 +440,7 @@ class FilesProvider
     }
 
     /**
-     * переименование папки
+     * Переименование папки
      *
      * @param array $userData
      * @return array
@@ -495,7 +490,7 @@ class FilesProvider
     }
 
     /**
-     * удаление папки
+     * Удаление папки
      *
      * @param array $userData
      * @return array
@@ -542,7 +537,7 @@ class FilesProvider
     }
 
     /**
-     * список пользователей, имеющих доступ к файлу
+     * Список пользователей, имеющих доступ к файлу
      *
      * @param array $userData
      * @return array
@@ -570,7 +565,7 @@ class FilesProvider
     }
 
     /**
-     * предоставление доступа к файлу
+     * Предоставление доступа к файлу
      *
      * @param array $userData
      * @return array
@@ -623,7 +618,7 @@ class FilesProvider
     }
 
     /**
-     * прекращение доступа к файлу
+     * Прекращение доступа к файлу
      *
      * @param array $userData
      * @return array
@@ -650,7 +645,7 @@ class FilesProvider
     }
 
     /**
-     * проверка наличия записи о доступе к файлу
+     * Проверка наличия записи о доступе к файлу
      *
      * @param array $userData
      * @return boolean

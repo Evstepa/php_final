@@ -1,7 +1,7 @@
 <?php
 
 /**
- * отправка email
+ * Отправка email
  *
  * @param string  $to
  * @param string  $from
@@ -10,22 +10,14 @@
  */
 function sendMessageMail(string $to, string $from, string $title, string $message): array
 {
-    //Адресат с отправителем
-    //$to = $to;
-    //$from = $from;
-
-    //Формируем заголовок письма
     $subject = $title;
-    // $subject = '=?utf-8?b?' . base64_encode($title) . '?=';
 
-    //Формируем заголовки для почтового сервера
     $headers = "Content-type: text/html; charset=\"utf-8\"\r\n";
     $headers .= "From: " . $from . "\r\n";
     $headers .= "MIME-Version: 1.0\r\n";
     $headers .= "Date: " . date('D, d M Y h:i:s O') . "\r\n";
     $headers .= 'X-Mailer: PHP/' . phpversion();
 
-    //Отправляем данные на ящик админа сайта
     $resault = mail($to, $subject, $message, $headers);
 
     if (!$resault)
@@ -41,7 +33,7 @@ function sendMessageMail(string $to, string $from, string $title, string $messag
 }
 
 /**
- * формирование и выполнение запроса к БД на вставку или изменение данных
+ * Формирование и выполнение запроса к БД на вставку или изменение данных
  *
  * @param array $data
  * @return boolean
@@ -87,23 +79,3 @@ function getSqlCreateUpdate(array $data): bool
 
     return $answer;
 }
-
-// function cleanArray(array $data, string $substr = null): array
-// {
-//     $data = array_filter($data, function ($item) {
-//         return ($item != "." && $item != "..");
-//     });
-//     if (isset($substr)) {
-//         $data = array_map(function ($item) use ($substr) {
-//             return str_ireplace($substr, '', $item);
-//         }, $data);
-//     }
-//     $data = array_values($data);
-
-//     $data = array_combine(
-//         range(1, sizeof($data)),
-//         $data
-//     );
-
-//     return $data;
-// }

@@ -15,6 +15,12 @@ class Response
         $this->setData($data);
     }
 
+    /**
+     * Установить данные ответа
+     *
+     * @param array $data
+     * @return void
+     */
     public function setData(array $data): void
     {
         $this->body = json_encode($data['body']);
@@ -23,6 +29,11 @@ class Response
         $this->headers[] = STATUS_MESSAGES[$this->status];
     }
 
+    /**
+     * Отправить ответ
+     *
+     * @return void
+     */
     public function send(): void
     {
         foreach ($this->headers as $item) {
