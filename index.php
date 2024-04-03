@@ -16,9 +16,6 @@ session_start();
 
 $request = new Request();
 
-// var_dump($request);
-// die();
-
 if ($request->getRoute() === '/') {
     echo 'Hello!';
     return;
